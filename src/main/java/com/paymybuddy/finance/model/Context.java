@@ -12,7 +12,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Context {
-    private User user;
+    private Person user;
     private String transfertCompteTo;
     private String transfertCompteFrom;
     private String newCompteTo;

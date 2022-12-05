@@ -12,8 +12,9 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class User {
+public class Person {
     private String email;
+    private String name;
     private String password;
     private List<Transaction> transactions = new ArrayList<>();
     private List<Compte> comptesTo = new ArrayList<>();
