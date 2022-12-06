@@ -1,6 +1,9 @@
-package com.paymybuddy.finance.model;
+package com.paymybuddy.finance.session;
 
 import java.util.List;
+
+import com.paymybuddy.finance.model.Compte;
+import com.paymybuddy.finance.model.Person;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -12,7 +15,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Context {
-    private Person user;
+    private Person person;
     private String transfertCompteTo;
     private String transfertCompteFrom;
     private String newCompteTo;
