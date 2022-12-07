@@ -1,18 +1,15 @@
 package com.paymybuddy.finance.controller;
 
 import java.security.Principal;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.ResolvableType;
+import org.springframework.core.env.Environment;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
-import org.springframework.security.oauth2.client.registration.ClientRegistration;
-import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.SessionAttributes;
 
 import com.paymybuddy.finance.model.Compte;
@@ -21,16 +18,23 @@ import com.paymybuddy.finance.service.ILoginService;
 import com.paymybuddy.finance.session.Context;
 
 @Controller
-@SessionAttributes(value = { "context" })
+@SessionAttributes(value = { "context", "person" })
 public class LoginController {
     @Autowired
     private ILoginService loginService;
 
     @Autowired
-    private ClientRegistrationRepository clientRegistrationRepository;
+    private Environment env;
 
-    private static String authorizationRequestBaseUri = "oauth2/authorization";
-    Map<String, String> oauth2AuthenticationUrls = new HashMap<>();
+    @ModelAttribute
+    public Context getContext() {
+	return new Context();
+    }
+
+    @ModelAttribute
+    public Person getPerson() {
+	return new Person();
+    }
 
     // Initialization of the model
     private void initModel(Model model, Person person) {
@@ -41,9 +45,7 @@ public class LoginController {
 	person.getComptesTo().add(new Compte("Buddy : " + person.getName()));
 	person.getComptesTo().add(new Compte("BNP : " + person.getName()));
 
-	Context context = new Context();
-	context.setPerson(person);
-	model.addAttribute("context", context);
+	model.addAttribute("person", person);
     }
 
     // Login
@@ -63,7 +65,7 @@ public class LoginController {
 	if (person != null) {
 	    // Initialization of the model with the person data
 	    initModel(model, person);
-	    return "transfert";
+	    return "home";
 	} else {
 	    // Anormal call, return to login
 	    return "login";
@@ -73,30 +75,11 @@ public class LoginController {
     @GetMapping("/login")
     public String login(Model model) {
 
-	Iterable<ClientRegistration> clientRegistrations = null;
+	model.addAttribute("urlGoogle", (String) env.getProperty("url.oauth2.authorization.google"));
+	model.addAttribute("urlGithub", (String) env.getProperty("url.oauth2.authorization.github"));
 
-	ResolvableType type = ResolvableType.forInstance(clientRegistrationRepository)
-		.as(Iterable.class);
-	if (type != ResolvableType.NONE &&
-		ClientRegistration.class.isAssignableFrom(type.resolveGenerics()[0])) {
-	    clientRegistrations = (Iterable<ClientRegistration>) clientRegistrationRepository;
-	}
-
-	clientRegistrations.forEach(registration -> oauth2AuthenticationUrls.put(registration.getClientName(),
-		authorizationRequestBaseUri + "/" + registration.getRegistrationId()));
-
-	// Create Specific attribute url for google, github
-	String urlGithub = null, urlGoogle = null;
-	for (String key : oauth2AuthenticationUrls.keySet()) {
-	    if ("Google".equals(key)) {
-		urlGoogle = oauth2AuthenticationUrls.get(key);
-	    }
-	    if ("GitHub".equals(key)) {
-		urlGithub = oauth2AuthenticationUrls.get(key);
-	    }
-	}
-	model.addAttribute("urlGoogle", urlGoogle);
-	model.addAttribute("urlGithub", urlGithub);
+	model.addAttribute("urlIconGoogle", (String) env.getProperty("url.icon.google"));
+	model.addAttribute("urlIconGithub", (String) env.getProperty("url.icon.github"));
 
 	return "login";
     }

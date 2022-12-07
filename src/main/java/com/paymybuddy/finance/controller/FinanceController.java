@@ -11,21 +11,54 @@ import com.paymybuddy.finance.model.Transaction;
 import com.paymybuddy.finance.session.Context;
 
 @Controller
-@SessionAttributes(value = { "context" })
+@SessionAttributes(value = { "context", "person" })
 public class FinanceController {
 
-    @PostMapping("/transfert")
-    public String transfert(@ModelAttribute("context") Context context) {
-	Person person = context.getPerson();
+    @PostMapping("/gotoHome")
+    public String home() {
+	return "home";
+    }
+
+    @PostMapping("/gotoTransfer")
+    public String transfer() {
+	return "transfer";
+    }
+
+    @PostMapping("/gotoContact")
+    public String contact() {
+	return "contact";
+    }
+
+    @PostMapping("/gotoProfile")
+    public String profile() {
+	return "profile";
+    }
+
+    @PostMapping("/transfer")
+    public String transfer(@ModelAttribute("context") Context context,
+	    @ModelAttribute("person") Person person) {
 	person.getTransactions().add(new Transaction(context.getTransfertCompteFrom(), context.getTransfertCompteTo(),
 		context.getDescription(), context.getTransfertAmount()));
-	return "transfert";
+	return "transfer";
     }
 
     @PostMapping("/addCompteTo")
-    public String addConnection(@ModelAttribute("context") Context context) {
-	Person person = context.getPerson();
+    public String addCompteTo(@ModelAttribute("context") Context context,
+	    @ModelAttribute("person") Person person) {
 	person.getComptesTo().add(new Compte(context.getNewCompteTo()));
-	return "transfert";
+	return "contact";
+    }
+
+    @PostMapping("/deleteCompteTo")
+    public String deleteCompteTo(@ModelAttribute("context") Context context,
+	    @ModelAttribute("person") Person person) {
+
+	for (Compte compteTo : person.getComptesTo()) {
+	    if (compteTo.getEmail().equals(context.getTransfertCompteTo())) {
+		person.getComptesTo().remove(compteTo);
+		break;
+	    }
+	}
+	return "contact";
     }
 }
