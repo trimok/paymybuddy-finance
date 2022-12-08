@@ -39,8 +39,6 @@ public class PayMyBuddySecurityConfig {
 
 	http.authorizeHttpRequests()
 		.requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
-		.requestMatchers("/admin").hasRole("ADMIN")
-		.requestMatchers("/user").hasRole("USER")
 		.anyRequest().authenticated()
 		.and().formLogin().loginPage("/login").failureUrl("/login?error=true").permitAll()
 		.and().oauth2Login().loginPage("/login").failureUrl("/login?error=true").permitAll()

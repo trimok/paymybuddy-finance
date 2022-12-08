@@ -4,12 +4,9 @@ import java.security.Principal;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.SessionAttributes;
 
 import com.paymybuddy.finance.modelmemory.CompteMemory;
@@ -26,16 +23,6 @@ public class LoginController {
     @Autowired
     private Environment env;
 
-    @ModelAttribute
-    public Context getContext() {
-	return new Context();
-    }
-
-    @ModelAttribute
-    public PersonMemory getPerson() {
-	return new PersonMemory();
-    }
-
     // Initialization of the model
     private void initModel(Model model, PersonMemory person) {
 
@@ -46,28 +33,26 @@ public class LoginController {
 	person.getComptesTo().add(new CompteMemory("BNP : " + person.getName()));
 
 	model.addAttribute("person", person);
+	model.addAttribute("context", new Context());
     }
 
     // Login
     @GetMapping("/*")
     public String getUserInfo(Model model, Principal user) {
-	PersonMemory person = null;
-
-	// Get the Person Object from different type of login
-	if (user instanceof UsernamePasswordAuthenticationToken) {
-	    // Basic login
-	    person = loginService.getUserId(user);
-	} else if (user instanceof OAuth2AuthenticationToken) {
-	    // OAuth / OIDC login
-	    person = loginService.getOauth2UserId(user);
+	// Anormal call
+	if (model.getAttribute("person") != null) {
+	    return "login";
 	}
+
+	// Authorization
+	PersonMemory person = loginService.getPersonFromPrincipal(user);
 
 	if (person != null) {
 	    // Initialization of the model with the person data
 	    initModel(model, person);
 	    return "home";
 	} else {
-	    // Anormal call, return to login
+	    // Anormal call and/or anormal authorization, return to login
 	    return "login";
 	}
     }

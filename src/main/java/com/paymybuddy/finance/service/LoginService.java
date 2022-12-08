@@ -29,8 +29,22 @@ public class LoginService implements ILoginService {
 	return null;
     }
 
+    // Building a PersonMemory Object from a Principal
+    public PersonMemory getPersonFromPrincipal(Principal user) {
+	PersonMemory person = null;
+
+	// Get the Person Object from different type of login
+	if (user instanceof UsernamePasswordAuthenticationToken) {
+	    // Basic login
+	    person = getUserId(user);
+	} else if (user instanceof OAuth2AuthenticationToken) {
+	    // OAuth / OIDC login
+	    person = getOauth2UserId(user);
+	}
+	return person;
+    }
+
     // OAuth2 / OIDC login
-    @Override
     public PersonMemory getOauth2UserId(Principal user) {
 	PersonMemory person = new PersonMemory();
 
@@ -87,7 +101,6 @@ public class LoginService implements ILoginService {
     }
 
     // Basic login
-    @Override
     public PersonMemory getUserId(Principal principal) {
 	PersonMemory person = new PersonMemory();
 	// Get the authentication token
