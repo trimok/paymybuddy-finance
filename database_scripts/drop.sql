@@ -1,11 +1,5 @@
-alter table account drop foreign key FKawl1lrpngb7h5ktg79odeic5w;
-alter table account drop foreign key FKd9dhia7smrg88vcbiykhofxee;
-alter table person_contactaccount drop foreign key FKf9avxkukncptbrtugeubkycqj;
-alter table person_contactaccount drop foreign key FKc4f28hj34sgf2ujl3joio7cb5;
-alter table transaction drop foreign key FKlax6nioh16qapni5oetnsocoh;
-alter table transaction drop foreign key FKi2std9osl77a5s35sf736s64;
+drop table if exists transaction;
+drop table if exists person_contactaccount;
 drop table if exists account;
 drop table if exists bank;
 drop table if exists person;
-drop table if exists person_contactaccount;
-drop table if exists transaction;
