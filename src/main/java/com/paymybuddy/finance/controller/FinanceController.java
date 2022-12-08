@@ -5,9 +5,9 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.SessionAttributes;
 
-import com.paymybuddy.finance.model.Compte;
-import com.paymybuddy.finance.model.Person;
-import com.paymybuddy.finance.model.Transaction;
+import com.paymybuddy.finance.modelmemory.CompteMemory;
+import com.paymybuddy.finance.modelmemory.PersonMemory;
+import com.paymybuddy.finance.modelmemory.TransactionMemory;
 import com.paymybuddy.finance.session.Context;
 
 @Controller
@@ -36,24 +36,24 @@ public class FinanceController {
 
     @PostMapping("/transfer")
     public String transfer(@ModelAttribute("context") Context context,
-	    @ModelAttribute("person") Person person) {
-	person.getTransactions().add(new Transaction(context.getTransfertCompteFrom(), context.getTransfertCompteTo(),
+	    @ModelAttribute("person") PersonMemory person) {
+	person.getTransactions().add(new TransactionMemory(context.getTransfertCompteFrom(), context.getTransfertCompteTo(),
 		context.getDescription(), context.getTransfertAmount()));
 	return "transfer";
     }
 
     @PostMapping("/addCompteTo")
     public String addCompteTo(@ModelAttribute("context") Context context,
-	    @ModelAttribute("person") Person person) {
-	person.getComptesTo().add(new Compte(context.getNewCompteTo()));
+	    @ModelAttribute("person") PersonMemory person) {
+	person.getComptesTo().add(new CompteMemory(context.getNewCompteTo()));
 	return "contact";
     }
 
     @PostMapping("/deleteCompteTo")
     public String deleteCompteTo(@ModelAttribute("context") Context context,
-	    @ModelAttribute("person") Person person) {
+	    @ModelAttribute("person") PersonMemory person) {
 
-	for (Compte compteTo : person.getComptesTo()) {
+	for (CompteMemory compteTo : person.getComptesTo()) {
 	    if (compteTo.getEmail().equals(context.getTransfertCompteTo())) {
 		person.getComptesTo().remove(compteTo);
 		break;

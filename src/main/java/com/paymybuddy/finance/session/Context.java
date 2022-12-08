@@ -2,7 +2,7 @@ package com.paymybuddy.finance.session;
 
 import java.util.List;
 
-import com.paymybuddy.finance.model.Compte;
+import com.paymybuddy.finance.modelmemory.CompteMemory;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -20,5 +20,5 @@ public class Context {
     private int transfertAmount;
     private String description;
 
-    private List<Compte> comptes = Compte.getComptes();
+    private List<CompteMemory> comptes = CompteMemory.getComptes();
 }

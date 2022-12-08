@@ -11,7 +11,7 @@ import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
-import com.paymybuddy.finance.model.Person;
+import com.paymybuddy.finance.modelmemory.PersonMemory;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -31,8 +31,8 @@ public class LoginService implements ILoginService {
 
     // OAuth2 / OIDC login
     @Override
-    public Person getOauth2UserId(Principal user) {
-	Person person = new Person();
+    public PersonMemory getOauth2UserId(Principal user) {
+	PersonMemory person = new PersonMemory();
 
 	// Authentication token
 	OAuth2AuthenticationToken authToken = ((OAuth2AuthenticationToken) user);
@@ -88,8 +88,8 @@ public class LoginService implements ILoginService {
 
     // Basic login
     @Override
-    public Person getUserId(Principal principal) {
-	Person person = new Person();
+    public PersonMemory getUserId(Principal principal) {
+	PersonMemory person = new PersonMemory();
 	// Get the authentication token
 	UsernamePasswordAuthenticationToken token = ((UsernamePasswordAuthenticationToken) principal);
 	if (token.isAuthenticated()) {

@@ -12,8 +12,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.SessionAttributes;
 
-import com.paymybuddy.finance.model.Compte;
-import com.paymybuddy.finance.model.Person;
+import com.paymybuddy.finance.modelmemory.CompteMemory;
+import com.paymybuddy.finance.modelmemory.PersonMemory;
 import com.paymybuddy.finance.service.ILoginService;
 import com.paymybuddy.finance.session.Context;
 
@@ -32,18 +32,18 @@ public class LoginController {
     }
 
     @ModelAttribute
-    public Person getPerson() {
-	return new Person();
+    public PersonMemory getPerson() {
+	return new PersonMemory();
     }
 
     // Initialization of the model
-    private void initModel(Model model, Person person) {
+    private void initModel(Model model, PersonMemory person) {
 
 	// Create private account + pay may buddy account for the person
-	person.getComptesFrom().add(new Compte("Buddy : " + person.getName()));
-	person.getComptesFrom().add(new Compte("BNP : " + person.getName()));
-	person.getComptesTo().add(new Compte("Buddy : " + person.getName()));
-	person.getComptesTo().add(new Compte("BNP : " + person.getName()));
+	person.getComptesFrom().add(new CompteMemory("Buddy : " + person.getName()));
+	person.getComptesFrom().add(new CompteMemory("BNP : " + person.getName()));
+	person.getComptesTo().add(new CompteMemory("Buddy : " + person.getName()));
+	person.getComptesTo().add(new CompteMemory("BNP : " + person.getName()));
 
 	model.addAttribute("person", person);
     }
@@ -51,7 +51,7 @@ public class LoginController {
     // Login
     @GetMapping("/*")
     public String getUserInfo(Model model, Principal user) {
-	Person person = null;
+	PersonMemory person = null;
 
 	// Get the Person Object from different type of login
 	if (user instanceof UsernamePasswordAuthenticationToken) {
