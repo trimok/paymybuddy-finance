@@ -37,6 +37,14 @@ public class Person {
 
     private String email;
 
+    private String password;
+
+    private boolean enabled = true;
+
+    @OneToMany(mappedBy = "person", orphanRemoval = true)
+    @Cascade({ CascadeType.ALL })
+    private Set<Authorities> authorities = new HashSet<>();
+
     @OneToMany(mappedBy = "person", orphanRemoval = true)
     @Cascade({ CascadeType.ALL })
     private Set<Account> accounts = new HashSet<>();

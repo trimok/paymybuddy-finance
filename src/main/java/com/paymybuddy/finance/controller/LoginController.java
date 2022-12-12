@@ -60,6 +60,7 @@ public class LoginController {
 	    return "home";
 	} else {
 	    // Anormal call and/or anormal authorization, return to login
+	    // Should never happen
 	    return "login";
 	}
     }
@@ -94,14 +95,15 @@ public class LoginController {
 	UserLogin userLogin = new UserLogin(username, password);
 	userLogin.setPassword(passwordEncoder.encode(userLogin.getPassword()));
 
+	model.addAttribute("username", username);
+
 	if (userDetailsManager.userExists(username)) {
 	    model.addAttribute("userAlreadyRegistered", true);
+	    return "login";
 	} else {
 	    userDetailsManager.createUser(new SecureUser(userLogin));
 	    model.addAttribute("userSuccessfullyRegistered", true);
+	    return "login";
 	}
-	model.addAttribute("username", username);
-
-	return "login";
     }
 }

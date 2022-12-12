@@ -25,7 +25,9 @@ public class PayMyBuddySecurityConfig {
 
     @Bean
     JdbcUserDetailsManager jdbcUserDetailsManager(DataSource dataSource) {
-	JdbcUserDetailsManager jdbcUserDetailsManager = new JdbcUserDetailsManager(dataSource);
+	JdbcUserDetailsManager jdbcUserDetailsManager = new PayMyBuddyJdbcUserDetailsManager();
+	jdbcUserDetailsManager.setDataSource(dataSource);
+
 	return jdbcUserDetailsManager;
     }
 
@@ -35,7 +37,7 @@ public class PayMyBuddySecurityConfig {
 	http.authorizeHttpRequests()
 		.requestMatchers("/registerNewUser", "/error").permitAll()
 		.requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
-		.anyRequest().authenticated()
+		.anyRequest().hasAnyAuthority("ROLE_USER")
 		.and().formLogin()
 		.loginPage("/login").failureUrl("/login?error=true")
 		.permitAll()
