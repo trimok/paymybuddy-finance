@@ -19,4 +19,10 @@ public class PersonMemory {
     private List<TransactionMemory> transactions = new ArrayList<>();
     private List<CompteMemory> comptesTo = new ArrayList<>();
     private List<CompteMemory> comptesFrom = new ArrayList<>();
+
+    public PersonMemory(String email, String name) {
+	super();
+	this.email = email;
+	this.name = name;
+    }
 }
