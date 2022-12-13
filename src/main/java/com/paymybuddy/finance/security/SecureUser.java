@@ -7,7 +7,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import com.paymybuddy.finance.dto.UserLogin;
+import com.paymybuddy.finance.dto.UserLoginDTO;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -24,7 +24,7 @@ public class SecureUser implements UserDetails {
      * 
      */
     private static final long serialVersionUID = 1L;
-    private UserLogin userLogin = null;
+    private UserLoginDTO userLogin = null;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

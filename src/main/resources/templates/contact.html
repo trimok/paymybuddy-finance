@@ -45,6 +45,17 @@
 
 			</div>
 		</div>
+		<div class="mb-3 d-flex mx-auto  w-50">
+			<div th:if="${selectAccountToAdd}"
+				class="mb-5 alert alert-success text-danger">Select an account
+				to add to the contacts.</div>
+			<div th:if="${selectAccountToRemove}"
+				class="mb-5 alert alert-success text-danger">Select a contact
+				to remove</div>
+			<div th:if="${accountAlreadyExists}"
+				class="mb-5 alert alert-success text-danger">Account already exists in contacts.</div>
+		</div>
+
 		<div class="container mx-auto">
 			<div class="row mb-3">
 				<div class="col-3"></div>
@@ -53,15 +64,17 @@
 						disabled>Buddy accounts</button>
 				</div>
 				<div class="col-3">
-					<select class="form-select" th:field="${context.newCompteTo}">
+					<select class="form-select"
+						th:field="${contactDTO.contactAccountIdToAdd}">
 						<option value="">Select an account</option>
-						<option th:each="compte : ${context.comptes}"
-							th:value="${compte.email}" th:text="${compte.email}"></option>
+						<option th:each="account : ${contactDTO.allAccounts}"
+							th:value="${account.id}" th:text="${account.person.name}"></option>
 					</select>
 				</div>
 				<div class="col-2">
-					<button type="button" class="btn btn-primary btn-group-small"						
-						onClick="form.action='/addCompteTo';submit();">Add a contact</button>
+					<button type="button" class="btn btn-primary btn-group-small"
+						onClick="form.action='/addCompteTo';submit();">Add a
+						contact</button>
 				</div>
 			</div>
 			<div class="row">
@@ -71,18 +84,20 @@
 						disabled>My Contacts</button>
 				</div>
 				<div class="col-3">
-					<select class="form-select" th:field="${context.transfertCompteTo}">
+					<select class="form-select"
+						th:field="${contactDTO.contactAccountIdToRemove}">
 						<option value="">Select a contact</option>
-						<option th:each="compte : *{comptesTo}" th:value="${compte.email}"
-							th:text="${compte.email}"></option>
+						<option th:each="account : *{contactAccounts}"
+							th:value="${account.id}" th:text="${account.person.name}"></option>
 					</select>
 				</div>
 				<div class="col-2">
 					<button type="button" class="btn btn-primary btn-group-small"
-						onClick="form.action='/deleteCompteTo';submit();">Delete the contact</button>
+						onClick="form.action='/deleteCompteTo';submit();">Delete
+						the contact</button>
 				</div>
 			</div>
-		</div>		
+		</div>
 	</form>
 	<script
 		src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js">

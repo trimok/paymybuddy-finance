@@ -19,7 +19,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @Entity
 
-public class Transaction {
+public class Transaction implements Comparable {
 
     public static enum TransactionType {
 	BANK_TO_BUDDY, BUDDY_TO_BUDDY, BUDDY_TO_BANK, BANK_TO_BANK, COMMISSION
@@ -76,5 +76,10 @@ public class Transaction {
     @Override
     public int hashCode() {
 	return getClass().hashCode();
+    }
+
+    @Override
+    public int compareTo(Object o) {
+	return this.transactionDate.isAfter(((Transaction) o).getTransactionDate()) ? -1 : 1;
     }
 }

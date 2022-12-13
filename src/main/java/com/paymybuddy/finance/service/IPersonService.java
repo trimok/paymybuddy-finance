@@ -6,6 +6,8 @@ import com.paymybuddy.finance.model.Person;
 
 public interface IPersonService {
 
+    Person savePerson(Person person);
+
     Person createPerson(String name, String email);
 
     Person findPersonByName(String name);
@@ -19,4 +21,6 @@ public interface IPersonService {
     Person findFetchWithAllPersonByName(String name);
 
     Person findFetchWithAccountsPersonByName(String name);
+
+    void deleteAllPersons();
 }

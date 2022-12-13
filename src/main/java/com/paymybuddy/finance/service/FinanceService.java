@@ -1,52 +1,64 @@
 package com.paymybuddy.finance.service;
 
+import static com.paymybuddy.finance.constants.Constants.AMOUNT_BEGIN;
 import static com.paymybuddy.finance.constants.Constants.COMMISSION_RATE;
 import static com.paymybuddy.finance.constants.Constants.PAY_MY_BUDDY_BANK;
 import static com.paymybuddy.finance.constants.Constants.PAY_MY_BUDDY_GENERIC_USER;
+import static com.paymybuddy.finance.constants.Constants.PAY_MY_BUDDY_GENERIC_USER_PASSWORD_ENCODED;
 import static com.paymybuddy.finance.constants.Constants.TRANSACTION_COMMISSION_DESCRIPTION;
+import static com.paymybuddy.finance.constants.Constants.USER_GENERIC_BANK;
 
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.paymybuddy.finance.dto.TransferDTO;
+import com.paymybuddy.finance.dto.UserLoginDTO;
 import com.paymybuddy.finance.model.Account;
+import com.paymybuddy.finance.model.Bank;
+import com.paymybuddy.finance.model.Person;
 import com.paymybuddy.finance.model.Transaction;
-import com.paymybuddy.finance.repository.AccountRepository;
-import com.paymybuddy.finance.repository.AuthoritiesRepository;
-import com.paymybuddy.finance.repository.BankRepository;
-import com.paymybuddy.finance.repository.PersonRepository;
-import com.paymybuddy.finance.repository.TransactionRepository;
+import com.paymybuddy.finance.security.SecureUser;
 
 @Service
 public class FinanceService implements IFinanceService {
+    @Autowired
+    UserDetailsManager userDetailsManager;
 
     @Autowired
-    AuthoritiesRepository authoritiesRepository;
+    IAuthoritiesService authoritiesService;
 
     @Autowired
-    PersonRepository personRepository;
+    IPersonService personService;
 
     @Autowired
-    BankRepository bankRepository;
+    IBankService bankService;
 
     @Autowired
-    AccountRepository accountRepository;
+    IAccountService accountService;
 
     @Autowired
-    TransactionRepository transactionRepository;
+    ITransactionService transactionService;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void deleteAll() {
-	transactionRepository.deleteAll();
-	accountRepository.deleteAll();
-	bankRepository.deleteAll();
-	authoritiesRepository.deleteAll();
-	personRepository.deleteAll();
+	List<Person> persons = personService.findAllPersons();
+	for (Person person : persons) {
+	    for (Account account : person.getContactAccounts()) {
+		accountService.removeContactAccount(person, account);
+	    }
+	}
+	transactionService.deleteAllTransactions();
+	accountService.deleteAllAccounts();
+	bankService.deleteAllBanks();
+	authoritiesService.deleteAllAuthorities();
+	personService.deleteAllPersons();
     }
 
     public Transaction.TransactionType getTransactionType(boolean buddyFrom, boolean buddyTo) {
@@ -78,13 +90,13 @@ public class FinanceService implements IFinanceService {
 	accountFrom.changeAmount(-amount);
 	accountTo.changeAmount(amount);
 
-	accountRepository.save(accountFrom);
-	accountRepository.save(accountTo);
+	accountService.saveAccount(accountFrom);
+	accountService.saveAccount(accountTo);
 
 	transaction.setAccountFrom(accountFrom);
 	transaction.setAccountTo(accountTo);
 
-	return transactionRepository.save(transaction);
+	return transactionService.saveTransaction(transaction);
     }
 
     @Override
@@ -100,7 +112,8 @@ public class FinanceService implements IFinanceService {
 	// Commission transaction
 	Transaction transactionCommission = null;
 	if (buddyFrom) {
-	    Account genericAccountPayMyBuddy = accountRepository.findByPersonNameAndBankName(PAY_MY_BUDDY_GENERIC_USER,
+	    Account genericAccountPayMyBuddy = accountService.findAccountByPersonNameAndBankName(
+		    PAY_MY_BUDDY_GENERIC_USER,
 		    PAY_MY_BUDDY_BANK);
 
 	    transactionCommission = createTransaction(accountFrom, genericAccountPayMyBuddy,
@@ -113,5 +126,55 @@ public class FinanceService implements IFinanceService {
 		amount, description, transactionType);
 
 	return buddyFrom ? Arrays.asList(transaction, transactionCommission) : Arrays.asList(transaction);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void createTransaction(Person person, TransferDTO transferDTO) {
+	Account accountFrom = accountService.findFetchTransactionsAccountById(transferDTO.getAccountFromId());
+	Account accountTo = accountService.findFetchTransactionsAccountById(transferDTO.getAccountToId());
+	createTransactions(accountFrom, accountTo, transferDTO.getAmount(), transferDTO.getDescription());
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void initApplication() {
+	deleteAll();
+
+	Bank payMyBuddyBank = bankService.createBank(PAY_MY_BUDDY_BANK);
+	bankService.createBank(USER_GENERIC_BANK);
+
+	userDetailsManager.createUser(
+		new SecureUser(
+			new UserLoginDTO(PAY_MY_BUDDY_GENERIC_USER, PAY_MY_BUDDY_GENERIC_USER_PASSWORD_ENCODED)));
+	Person payMyBuddyGenericUser = personService.findFetchWithAccountsPersonByName(PAY_MY_BUDDY_GENERIC_USER);
+
+	accountService.createAccount(0, payMyBuddyGenericUser, payMyBuddyBank);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Person initPerson(Person person) {
+	Person personDatabase = personService.findPersonByName(person.getName());
+	if (personDatabase == null) {
+	    personDatabase = personService.savePerson(person);
+	}
+
+	Bank bankUserGeneric = bankService.findBankByName(USER_GENERIC_BANK);
+	Bank bankPayMyBuddy = bankService.findBankByName(PAY_MY_BUDDY_BANK);
+
+	Account accountGeneric = accountService.findAccountByPersonNameAndBankName(personDatabase.getName(),
+		USER_GENERIC_BANK);
+	if (accountGeneric == null) {
+	    accountService.createAccount(AMOUNT_BEGIN, personDatabase, bankUserGeneric);
+	}
+
+	Account accountPayMyBuddy = accountService.findAccountByPersonNameAndBankName(personDatabase.getName(),
+		PAY_MY_BUDDY_BANK);
+	if (accountPayMyBuddy == null) {
+	    accountService.createAccount(0, personDatabase, bankPayMyBuddy);
+	}
+
+	return personDatabase;
     }
 }

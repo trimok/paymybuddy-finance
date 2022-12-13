@@ -17,6 +17,13 @@ public class PersonService implements IPersonService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
+    public Person savePerson(Person person) {
+
+	return personRepository.save(person);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
     public Person createPerson(String name, String email) {
 	Person person = new Person(name, email);
 
@@ -57,5 +64,12 @@ public class PersonService implements IPersonService {
     @Transactional(readOnly = true, noRollbackFor = Exception.class)
     public List<Person> findAllPersons() {
 	return personRepository.findAll();
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void deleteAllPersons() {
+	personRepository.deleteAll();
+	personRepository.flush();
     }
 }

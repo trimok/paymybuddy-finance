@@ -2,8 +2,8 @@ package com.paymybuddy.finance.service;
 
 import java.security.Principal;
 
-import com.paymybuddy.finance.modelmemory.PersonMemory;
+import com.paymybuddy.finance.model.Person;
 
 public interface ILoginService {
-    PersonMemory getPersonFromPrincipal(Principal user);
+    Person getPersonFromPrincipal(Principal user);
 }

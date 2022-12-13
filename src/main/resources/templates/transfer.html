@@ -53,19 +53,31 @@
 
 		<div class="mb-3 d-flex justify-content-center w-50 mx-auto">
 			<button type="button" class="btn btn-primary btn-group-small"
-				onClick="form.action='/gotoContact';submit();">Add a contact</button>
+				onClick="form.action='/gotoContact';submit();">Add a
+				contact</button>
 		</div>
 		<div class="mb-1 mx-auto d-flex justify-content-center">
 			<button type="button" class="btn btn-light btn-group-small btn"
 				disabled>Transfer</button>
 		</div>
 		<div class="mb-3 d-flex mx-auto  w-50">
+			<div th:if="${selectAccountFrom}"
+				class="mb-5 alert alert-success text-danger">Select an account
+				for origin</div>
+			<div th:if="${selectAccountTo}"
+				class="mb-5 alert alert-success text-danger">Select an account
+				for destination</div>
+			<div th:if="${accountsMustBeDifferent}"
+				class="mb-5 alert alert-success text-danger">The accounts must
+				be different</div>
+		</div>
+		<div class="mb-3 d-flex mx-auto  w-50">
 			<button type="button" class="btn btn-light btn-group-small btn"
 				disabled>From</button>
-			<select class="form-select" th:field="${context.transfertCompteFrom}">
+			<select class="form-select" th:field="${transferDTO.accountFromId}">
 				<option value="">Select an account</option>
-				<option th:each="compte : *{comptesFrom}" th:value="${compte.email}"
-					th:text="${compte.email}"></option>
+				<option th:each="account : *{accounts}" th:value="${account.id}"
+					th:text="${account.person.name} + ' : ' +  ${account.bank.name}"></option>
 			</select>
 		</div>
 		<div class="mb-3 d-flex mx-auto  w-50">
@@ -73,22 +85,23 @@
 				disabled>To</button>
 			<button type="button" class="btn btn-light btn-group-small btn"
 				disabled></button>
-			<select class="form-select" th:field="${context.transfertCompteTo}">
+			<select class="form-select" th:field="${transferDTO.accountToId}">
 				<option value="">Select an account</option>
-				<option th:each="compte : *{comptesTo}" th:value="${compte.email}"
-					th:text="${compte.email}"></option>
+				<option th:each="account : *{accounts}" th:value="${account.id}"
+					th:text="${account.person.name} + ' : '  + ${account.bank.name}"></option>
+				<option th:each="account : *{contactAccounts}"
+					th:value="${account.id}" th:text="${account.person.name}"></option>
 			</select>
 		</div>
 		<div class="mb-3 d-flex mx-auto w-50">
 			<button type="button" class="btn btn-light btn-group-small btn"
 				disabled>Amount</button>
-			<input type="number" id="amount"
-				th:field="${context.transfertAmount}" name="tentacles" min="0"
-				step="100" value="100">
+			<input type="number" id="amount" th:field="${transferDTO.amount}"
+				name="tentacles" min="0" step="100" value="100">
 			<button type="button" class="btn btn-light btn-group-small btn"
 				disabled>Description</button>
-			<input type="text" id="description" th:field="${context.description}"
-				value="Virement">
+			<input type="text" id="description"
+				th:field="${transferDTO.description}" value="Virement">
 		</div>
 		<div class="mb-3 d-flex mx-auto justify-content-center">
 			<button type="submit" class="btn btn-success btn-group-small">Pay</button>
@@ -101,16 +114,22 @@
 		<div class="mb-3 mx-auto d-flex justify-content-center">
 			<table class="table-striped table-bordered">
 				<tr class="bg-success">
+					<th>Date</th>
 					<th>From</th>
 					<th>To</th>
 					<th>Description</th>
 					<th>Amount</th>
+					<th>Type</th>
 				</tr>
 				<tr th:each="transaction : *{transactions}">
-					<td th:text="${transaction.emailFrom}"></td>
-					<td th:text="${transaction.emailTo}"></td>
+					<td th:text="${transaction.transactionDate}"></td>
+					<td
+						th:text="${transaction.accountFrom.person.name} + ' : ' + ${transaction.accountFrom.bank.name}"></td>
+					<td
+						th:text="${transaction.accountTo.person.name}  + ' : ' +  ${transaction.accountTo.bank.name}">></td>
 					<td th:text="${transaction.description}"></td>
 					<td th:text="${transaction.amount}"></td>
+					<td th:text="${transaction.transactionType.toString()}"></td>
 				</tr>
 			</table>
 		</div>
@@ -133,7 +152,8 @@
 		</div>
 	</form>
 	<script
-		src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js">		
+		src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js">
+		
 	</script>
 </body>
 </html>

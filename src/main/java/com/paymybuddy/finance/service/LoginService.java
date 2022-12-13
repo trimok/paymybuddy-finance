@@ -11,7 +11,7 @@ import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
-import com.paymybuddy.finance.modelmemory.PersonMemory;
+import com.paymybuddy.finance.model.Person;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -30,8 +30,8 @@ public class LoginService implements ILoginService {
     }
 
     // Building a PersonMemory Object from a Principal
-    public PersonMemory getPersonFromPrincipal(Principal user) {
-	PersonMemory person = null;
+    public Person getPersonFromPrincipal(Principal user) {
+	Person person = null;
 
 	// Get the Person Object from different type of login
 	if (user instanceof UsernamePasswordAuthenticationToken) {
@@ -45,8 +45,8 @@ public class LoginService implements ILoginService {
     }
 
     // OAuth2 / OIDC login
-    public PersonMemory getOauth2UserId(Principal user) {
-	PersonMemory person = new PersonMemory();
+    public Person getOauth2UserId(Principal user) {
+	Person person = new Person();
 
 	// Authentication token
 	OAuth2AuthenticationToken authToken = ((OAuth2AuthenticationToken) user);
@@ -101,8 +101,8 @@ public class LoginService implements ILoginService {
     }
 
     // Basic login
-    public PersonMemory getUserId(Principal principal) {
-	PersonMemory person = new PersonMemory();
+    public Person getUserId(Principal principal) {
+	Person person = new Person();
 	// Get the authentication token
 	UsernamePasswordAuthenticationToken token = ((UsernamePasswordAuthenticationToken) principal);
 	if (token.isAuthenticated()) {

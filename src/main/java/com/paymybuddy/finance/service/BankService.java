@@ -40,4 +40,11 @@ public class BankService implements IBankService {
     public List<Bank> findAllBanks() {
 	return bankRepository.findAll();
     }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void deleteAllBanks() {
+	bankRepository.deleteAll();
+	bankRepository.flush();
+    }
 }

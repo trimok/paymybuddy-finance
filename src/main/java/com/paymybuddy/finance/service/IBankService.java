@@ -13,4 +13,6 @@ public interface IBankService {
     Bank findBankByName(String name);
 
     Bank findWithAccountsBankByName(String name);
+
+    void deleteAllBanks();
 }

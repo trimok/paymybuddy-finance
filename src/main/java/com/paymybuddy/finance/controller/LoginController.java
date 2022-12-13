@@ -9,22 +9,29 @@ import org.springframework.security.provisioning.JdbcUserDetailsManager;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.SessionAttributes;
 
-import com.paymybuddy.finance.dto.UserLogin;
-import com.paymybuddy.finance.modelmemory.CompteMemory;
-import com.paymybuddy.finance.modelmemory.PersonMemory;
+import com.paymybuddy.finance.dto.UserLoginDTO;
+import com.paymybuddy.finance.model.Person;
 import com.paymybuddy.finance.security.SecureUser;
+import com.paymybuddy.finance.service.IFinanceService;
 import com.paymybuddy.finance.service.ILoginService;
-import com.paymybuddy.finance.session.Context;
+import com.paymybuddy.finance.service.IPersonService;
 
 @Controller
-@SessionAttributes(value = { "context", "person" })
+@SessionAttributes(value = { "person" })
 public class LoginController {
     @Autowired
     private ILoginService loginService;
+
+    @Autowired
+    private IFinanceService financeService;
+
+    @Autowired
+    private IPersonService personService;
 
     @Autowired
     private Environment env;
@@ -35,38 +42,35 @@ public class LoginController {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    // Initialization of the model
-    private void initModel(Model model, PersonMemory person) {
-
-	// Create private account + pay may buddy account for the person
-	person.getComptesFrom().add(new CompteMemory("Buddy : " + person.getName()));
-	person.getComptesFrom().add(new CompteMemory("BNP : " + person.getName()));
-	person.getComptesTo().add(new CompteMemory("Buddy : " + person.getName()));
-	person.getComptesTo().add(new CompteMemory("BNP : " + person.getName()));
-
-	model.addAttribute("person", person);
-	model.addAttribute("context", new Context());
-    }
-
     // Login Callback
     @GetMapping("/*")
-    public String getUserInfo(Model model, Principal user) {
-	// Authorization
-	PersonMemory person = loginService.getPersonFromPrincipal(user);
-
-	if (person != null) {
-	    // Initialization of the model with the person data
-	    initModel(model, person);
-	    return "home";
-	} else {
-	    // Anormal call and/or anormal authorization, return to login
+    public String getUserInfo(Model model, Principal user, @ModelAttribute("person") Person personAttribute) {
+	if (personAttribute.getName() != null) {
 	    // Should never happen
 	    return "login";
+	} else {
+
+	    // Authorization
+	    Person person = loginService.getPersonFromPrincipal(user);
+
+	    if (person != null) {
+		person = financeService.initPerson(person);
+		person = personService.findFetchWithAllPersonByName(person.getName());
+		model.addAttribute("person", person);
+		return "home";
+	    } else {
+		// Anormal call and/or anormal authorization, return to login
+		// Should never happen
+		return "login";
+	    }
 	}
     }
 
     @GetMapping("/login")
     public String login(Model model) {
+
+	// To avoid log errors
+	model.addAttribute("person", new Person());
 
 	model.addAttribute("urlGoogle", (String) env.getProperty("url.oauth2.authorization.google"));
 	model.addAttribute("urlGithub", (String) env.getProperty("url.oauth2.authorization.github"));
@@ -92,7 +96,7 @@ public class LoginController {
 	    return "registerNewUser";
 	}
 
-	UserLogin userLogin = new UserLogin(username, password);
+	UserLoginDTO userLogin = new UserLoginDTO(username, password);
 	userLogin.setPassword(passwordEncoder.encode(userLogin.getPassword()));
 
 	model.addAttribute("username", username);

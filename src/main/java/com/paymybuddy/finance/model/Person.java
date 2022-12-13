@@ -1,7 +1,11 @@
 package com.paymybuddy.finance.model;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
 
 import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.CascadeType;
@@ -68,5 +72,23 @@ public class Person {
 	super();
 	this.email = email;
 	this.name = name;
+    }
+
+    @SuppressWarnings("unchecked")
+    public List<Transaction> getTransactions() {
+	Set<Transaction> transactionsSet = new HashSet<>();
+
+	for (Account account : accounts) {
+	    transactionsSet.addAll(account.getTransactionsFrom());
+	    transactionsSet.addAll(account.getTransactionsTo());
+	}
+
+	Set<Transaction> transactionsTreeSet = new TreeSet<>(transactionsSet);
+
+	List<Transaction> transactionList = new ArrayList<>();
+	transactionList.addAll(transactionsTreeSet);
+	Collections.sort(transactionList);
+
+	return transactionList;
     }
 }

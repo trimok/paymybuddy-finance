@@ -21,7 +21,21 @@ public class TransactionService implements ITransactionService {
 
     @Override
     @Transactional(readOnly = true, noRollbackFor = Exception.class)
+    public Transaction saveTransaction(Transaction transaction) {
+	return transactionRepository.save(transaction);
+    }
+
+    @Override
+    @Transactional(readOnly = true, noRollbackFor = Exception.class)
     public List<Transaction> findAllTransactions() {
 	return transactionRepository.findAll();
     }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void deleteAllTransactions() {
+	transactionRepository.deleteAll();
+	transactionRepository.flush();
+    }
+
 }
