@@ -2,6 +2,7 @@ package com.paymybuddy.finance.model;
 
 import java.time.LocalDate;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -17,7 +18,13 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
+
 public class Transaction {
+
+    public static enum TransactionType {
+	BANK_TO_BUDDY, BUDDY_TO_BUDDY, BUDDY_TO_BANK, BANK_TO_BANK, COMMISSION
+    };
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -30,13 +37,26 @@ public class Transaction {
 
     private double amount;
     private String description;
+
+    @Column(name = "TRANSACTION_DATE")
     private LocalDate transactionDate;
 
-    public Transaction(float amount, String description, LocalDate transactionDate) {
+    @Column(name = "TRANSACTION_TYPE")
+    private TransactionType transactionType = TransactionType.BUDDY_TO_BUDDY;
+
+    public Transaction(double amount, String description, LocalDate transactionDate) {
 	super();
 	this.amount = amount;
 	this.description = description;
 	this.transactionDate = transactionDate;
+    }
+
+    public Transaction(double amount, String description, LocalDate transactionDate, TransactionType transactionType) {
+	super();
+	this.amount = amount;
+	this.description = description;
+	this.transactionDate = transactionDate;
+	this.transactionType = transactionType;
     }
 
     @Override
