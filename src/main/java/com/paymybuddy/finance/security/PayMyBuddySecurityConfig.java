@@ -37,7 +37,7 @@ public class PayMyBuddySecurityConfig {
 	http.authorizeHttpRequests()
 		.requestMatchers("/registerNewUser", "/error").permitAll()
 		.requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
-		.anyRequest().hasAnyAuthority("ROLE_USER")
+		.anyRequest().authenticated()
 		.and().formLogin()
 		.loginPage("/login").failureUrl("/login?error=true")
 		.permitAll()
@@ -45,7 +45,8 @@ public class PayMyBuddySecurityConfig {
 		.and().logout().logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
 		.logoutSuccessUrl("/login?logout=true")
 		.deleteCookies("JSESSIONID")
-		.invalidateHttpSession(true).permitAll();
+		.invalidateHttpSession(true).permitAll()
+		.and().csrf().disable();
 
 	return http.build();
     }
