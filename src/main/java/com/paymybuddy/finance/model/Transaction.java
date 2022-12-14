@@ -1,6 +1,6 @@
 package com.paymybuddy.finance.model;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -19,7 +19,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @Entity
 
-public class Transaction implements Comparable {
+public class Transaction implements Comparable<Transaction> {
 
     public static enum TransactionType {
 	BANK_TO_BUDDY, BUDDY_TO_BUDDY, BUDDY_TO_BANK, BANK_TO_BANK, COMMISSION
@@ -39,19 +39,20 @@ public class Transaction implements Comparable {
     private String description;
 
     @Column(name = "TRANSACTION_DATE")
-    private LocalDate transactionDate;
+    private LocalDateTime transactionDate;
 
     @Column(name = "TRANSACTION_TYPE")
     private TransactionType transactionType = TransactionType.BUDDY_TO_BUDDY;
 
-    public Transaction(double amount, String description, LocalDate transactionDate) {
+    public Transaction(double amount, String description, LocalDateTime transactionDate) {
 	super();
 	this.amount = amount;
 	this.description = description;
 	this.transactionDate = transactionDate;
     }
 
-    public Transaction(double amount, String description, LocalDate transactionDate, TransactionType transactionType) {
+    public Transaction(double amount, String description, LocalDateTime transactionDate,
+	    TransactionType transactionType) {
 	super();
 	this.amount = amount;
 	this.description = description;
@@ -79,7 +80,7 @@ public class Transaction implements Comparable {
     }
 
     @Override
-    public int compareTo(Object o) {
-	return this.transactionDate.isAfter(((Transaction) o).getTransactionDate()) ? -1 : 1;
+    public int compareTo(Transaction transaction) {
+	return this.transactionDate.isAfter(transaction.getTransactionDate()) ? -1 : 1;
     }
 }

@@ -12,6 +12,8 @@ public interface IFinanceService {
 
     void deleteAll();
 
+    List<String> validateCreateTransaction(Person person, TransferDTO transferDTO);
+
     void createTransaction(Person person, TransferDTO transferDTO);
 
     List<Transaction> createTransactions(Account accountFrom, Account accountTo, double amount, String description);
@@ -22,4 +24,5 @@ public interface IFinanceService {
     void initApplication();
 
     Person initPerson(Person person);
+
 }

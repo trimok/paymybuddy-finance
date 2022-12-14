@@ -47,7 +47,7 @@ public class Person {
 
     @OneToMany(mappedBy = "person", orphanRemoval = true)
     @Cascade({ CascadeType.ALL })
-    private Set<Authorities> authorities = new HashSet<>();
+    private Set<Role> roles = new HashSet<>();
 
     @OneToMany(mappedBy = "person", orphanRemoval = true)
     @Cascade({ CascadeType.ALL })

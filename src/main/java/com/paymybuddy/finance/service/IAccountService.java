@@ -15,7 +15,11 @@ public interface IAccountService {
 
     Account createContactAccount(Person person, Account contactAccount);
 
+    List<String> validateCreateContactAccount(Person person, ContactDTO contactDTO);
+
     Account createContactAccount(Person person, ContactDTO contactDTO);
+
+    Account findAccountById(Long accountId);
 
     Account findFetchTransactionsAccountById(long accountId);
 
@@ -31,10 +35,10 @@ public interface IAccountService {
 
     void removeContactAccount(Person person, Account contactAccount);
 
+    List<String> validateRemoveContactAccount(Person person, ContactDTO contactDTO);
+
     void removeContactAccount(Person person, ContactDTO contactDTO);
 
     void deleteAllAccounts();
-
-    Account findAccountById(Long accountId);
 
 }

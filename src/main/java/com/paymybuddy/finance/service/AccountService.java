@@ -1,5 +1,6 @@
 package com.paymybuddy.finance.service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +16,12 @@ import com.paymybuddy.finance.repository.PersonRepository;
 
 @Service
 public class AccountService implements IAccountService {
+    private static final String ERROR_SELECT_ACCOUNT_TO_REMOVE = "selectAccountToRemove";
+
+    private static final String ERROR_ACCOUNT_ALREADY_EXISTS = "accountAlreadyExists";
+
+    private static final String ERROR_SELECT_ACCOUNT_TO_ADD = "selectAccountToAdd";
+
     @Autowired
     AccountRepository accountRepository;
 
@@ -47,11 +54,38 @@ public class AccountService implements IAccountService {
     }
 
     @Override
+    public List<String> validateCreateContactAccount(Person person, ContactDTO contactDTO) {
+	List<String> errors = new ArrayList<>();
+
+	if (contactDTO.getContactAccountIdToAdd() == null) {
+	    errors.add(ERROR_SELECT_ACCOUNT_TO_ADD);
+	} else {
+	    Account accountToAdd = findAccountById(contactDTO.getContactAccountIdToAdd());
+	    if (person.getContactAccounts().contains(accountToAdd)) {
+		errors.add(ERROR_ACCOUNT_ALREADY_EXISTS);
+	    }
+	}
+
+	return errors;
+    }
+
+    @Override
     @Transactional(rollbackFor = Exception.class)
     public Account createContactAccount(Person person, Account contactAccount) {
 	person.addContactAccount(contactAccount);
 
 	return accountRepository.save(contactAccount);
+    }
+
+    @Override
+    public List<String> validateRemoveContactAccount(Person person, ContactDTO contactDTO) {
+	List<String> errors = new ArrayList<>();
+
+	if (contactDTO.getContactAccountIdToRemove() == null) {
+	    errors.add(ERROR_SELECT_ACCOUNT_TO_REMOVE);
+	}
+
+	return errors;
     }
 
     @Override

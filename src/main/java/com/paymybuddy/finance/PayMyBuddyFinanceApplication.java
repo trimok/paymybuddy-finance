@@ -25,6 +25,6 @@ public class PayMyBuddyFinanceApplication {
 
     @EventListener(ApplicationReadyEvent.class)
     public void init() {
-	// financeService.initApplication();
+	financeService.initApplication();
     }
 }

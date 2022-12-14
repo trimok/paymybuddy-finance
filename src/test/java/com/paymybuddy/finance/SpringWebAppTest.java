@@ -82,6 +82,7 @@ public class SpringWebAppTest {
 
     @BeforeAll
     public void setUp() {
+	financeService.initApplication();
     }
 
     @Test
@@ -92,7 +93,7 @@ public class SpringWebAppTest {
 
     @Test
     public void userLoginTest() throws Exception {
-	mvc.perform(formLogin("/login").user("PAY_MY_BUDDY_GENERIC_USER").password(
+	mvc.perform(formLogin("/login").user(PAY_MY_BUDDY_GENERIC_USER).password(
 		"password")).andExpect(authenticated());
     }
 

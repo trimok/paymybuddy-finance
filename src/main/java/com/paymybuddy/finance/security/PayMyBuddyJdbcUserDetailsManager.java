@@ -6,12 +6,12 @@ import org.springframework.security.provisioning.JdbcUserDetailsManager;
 
 public class PayMyBuddyJdbcUserDetailsManager extends JdbcUserDetailsManager {
 
-    private final static String CREATE_AUTHORITY_QUERY = "insert into authorities (name, roles, person_id) values (?,?,?)";
+    private final static String CREATE_AUTHORITY_QUERY = "insert into role (name, roles, person_id) values (?,?,?)";
     private final static String CREATE_USER_QUERY = "insert into person (name, email, password, enabled) values (?,?,?,?)";
     private final static String USER_ID_EXISTS_QUERY = "select id from person where name = ?";
     private final static String USERNAME_EXISTS_QUERY = "select name from person where name = ?";
     private final static String USERS_BY_USERNAME_QUERY = "select name, password, enabled from person where name = ?";
-    private final static String AUTHORITIES_BY_USERNAME_QUERY = "select name, roles from authorities where name = ?";
+    private final static String AUTHORITIES_BY_USERNAME_QUERY = "select name, roles from role where name = ?";
 
     public PayMyBuddyJdbcUserDetailsManager() {
 	setCreateUserSql(CREATE_USER_QUERY);

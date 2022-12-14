@@ -8,7 +8,8 @@ import static com.paymybuddy.finance.constants.Constants.PAY_MY_BUDDY_GENERIC_US
 import static com.paymybuddy.finance.constants.Constants.TRANSACTION_COMMISSION_DESCRIPTION;
 import static com.paymybuddy.finance.constants.Constants.USER_GENERIC_BANK;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -27,11 +28,21 @@ import com.paymybuddy.finance.security.SecureUser;
 
 @Service
 public class FinanceService implements IFinanceService {
+    private static final String ERROR_ORIGIN_ACCOUNT_AMOUNT_NOT_SUFFICIENT = "originAccountAmountNotSufficient";
+
+    private static final String ERROR_TRANSACTION_MUST_BE_FROM_BUDDY_ACCOUNT = "transactionMustBeFromBuddyAccount";
+
+    private static final String ERROR_ACCOUNTS_MUST_BE_DIFFERENT = "accountsMustBeDifferent";
+
+    private static final String ERROR_SELECT_ACCOUNT_TO = "selectAccountTo";
+
+    private static final String ERROR_SELECT_ACCOUNT_FROM = "selectAccountFrom";
+
     @Autowired
     UserDetailsManager userDetailsManager;
 
     @Autowired
-    IAuthoritiesService authoritiesService;
+    IRoleService roleService;
 
     @Autowired
     IPersonService personService;
@@ -57,8 +68,33 @@ public class FinanceService implements IFinanceService {
 	transactionService.deleteAllTransactions();
 	accountService.deleteAllAccounts();
 	bankService.deleteAllBanks();
-	authoritiesService.deleteAllAuthorities();
+	roleService.deleteAllRoles();
 	personService.deleteAllPersons();
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void initApplication() {
+	deleteAll();
+
+	Bank payMyBuddyBank = bankService.findBankByName(PAY_MY_BUDDY_BANK);
+	if (payMyBuddyBank == null) {
+	    payMyBuddyBank = bankService.createBank(PAY_MY_BUDDY_BANK);
+	}
+
+	Bank userGenricBank = bankService.findBankByName(USER_GENERIC_BANK);
+	if (userGenricBank == null) {
+	    userGenricBank = bankService.createBank(USER_GENERIC_BANK);
+	}
+
+	Person payMyBuddyGenericUser = personService.findPersonByName(PAY_MY_BUDDY_GENERIC_USER);
+	if (payMyBuddyGenericUser == null) {
+	    userDetailsManager.createUser(
+		    new SecureUser(
+			    new UserLoginDTO(PAY_MY_BUDDY_GENERIC_USER, PAY_MY_BUDDY_GENERIC_USER_PASSWORD_ENCODED)));
+	    payMyBuddyGenericUser = personService.findFetchWithAccountsPersonByName(PAY_MY_BUDDY_GENERIC_USER);
+	    accountService.createAccount(0, payMyBuddyGenericUser, payMyBuddyBank);
+	}
     }
 
     public Transaction.TransactionType getTransactionType(boolean buddyFrom, boolean buddyTo) {
@@ -85,7 +121,7 @@ public class FinanceService implements IFinanceService {
     public Transaction createTransaction(Account accountFrom, Account accountTo, double amount, String description,
 	    Transaction.TransactionType transactionType) {
 
-	Transaction transaction = new Transaction(amount, description, LocalDate.now(), transactionType);
+	Transaction transaction = new Transaction(amount, description, LocalDateTime.now(), transactionType);
 
 	accountFrom.changeAmount(-amount);
 	accountTo.changeAmount(amount);
@@ -129,27 +165,36 @@ public class FinanceService implements IFinanceService {
     }
 
     @Override
+    public List<String> validateCreateTransaction(Person person, TransferDTO transferDTO) {
+	List<String> errors = new ArrayList<>();
+
+	if (transferDTO.getAccountFromId() == null) {
+	    errors.add(ERROR_SELECT_ACCOUNT_FROM);
+	} else if (transferDTO.getAccountToId() == null) {
+	    errors.add(ERROR_SELECT_ACCOUNT_TO);
+	} else if (transferDTO.getAccountToId() == transferDTO.getAccountFromId()) {
+	    errors.add(ERROR_ACCOUNTS_MUST_BE_DIFFERENT);
+	} else {
+	    Account accountFrom = accountService.findAccountById(transferDTO.getAccountFromId());
+	    Account accountTo = accountService.findAccountById(transferDTO.getAccountToId());
+	    if (!accountFrom.getBank().getName().equals(PAY_MY_BUDDY_BANK)
+		    &&
+		    accountTo.getPerson().getId() != person.getId()) {
+		errors.add(ERROR_TRANSACTION_MUST_BE_FROM_BUDDY_ACCOUNT);
+	    } else if (transferDTO.getAmount() > accountFrom.getAmount()) {
+		errors.add(ERROR_ORIGIN_ACCOUNT_AMOUNT_NOT_SUFFICIENT);
+	    }
+	}
+
+	return errors;
+    }
+
+    @Override
     @Transactional(rollbackFor = Exception.class)
     public void createTransaction(Person person, TransferDTO transferDTO) {
 	Account accountFrom = accountService.findFetchTransactionsAccountById(transferDTO.getAccountFromId());
 	Account accountTo = accountService.findFetchTransactionsAccountById(transferDTO.getAccountToId());
 	createTransactions(accountFrom, accountTo, transferDTO.getAmount(), transferDTO.getDescription());
-    }
-
-    @Override
-    @Transactional(rollbackFor = Exception.class)
-    public void initApplication() {
-	deleteAll();
-
-	Bank payMyBuddyBank = bankService.createBank(PAY_MY_BUDDY_BANK);
-	bankService.createBank(USER_GENERIC_BANK);
-
-	userDetailsManager.createUser(
-		new SecureUser(
-			new UserLoginDTO(PAY_MY_BUDDY_GENERIC_USER, PAY_MY_BUDDY_GENERIC_USER_PASSWORD_ENCODED)));
-	Person payMyBuddyGenericUser = personService.findFetchWithAccountsPersonByName(PAY_MY_BUDDY_GENERIC_USER);
-
-	accountService.createAccount(0, payMyBuddyGenericUser, payMyBuddyBank);
     }
 
     @Override

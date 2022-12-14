@@ -64,16 +64,15 @@
 						disabled>Buddy accounts</button>
 				</div>
 				<div class="col-3">
-					<select class="form-select"
+					<select  class="form-select" size="5"  
 						th:field="${contactDTO.contactAccountIdToAdd}">
-						<option value="">Select an account</option>
 						<option th:each="account : ${contactDTO.allAccounts}"
 							th:value="${account.id}" th:text="${account.person.name}"></option>
 					</select>
 				</div>
-				<div class="col-2">
+				<div class="col-2  my-auto">
 					<button type="button" class="btn btn-primary btn-group-small"
-						onClick="form.action='/addCompteTo';submit();">Add a
+						onClick="form.action='/addContactAccount';submit();">Add a
 						contact</button>
 				</div>
 			</div>
@@ -84,17 +83,15 @@
 						disabled>My Contacts</button>
 				</div>
 				<div class="col-3">
-					<select class="form-select"
+					<select  class="form-select" size="5"  
 						th:field="${contactDTO.contactAccountIdToRemove}">
-						<option value="">Select a contact</option>
 						<option th:each="account : *{contactAccounts}"
 							th:value="${account.id}" th:text="${account.person.name}"></option>
 					</select>
 				</div>
-				<div class="col-2">
+				<div class="col-2 my-auto" >
 					<button type="button" class="btn btn-primary btn-group-small"
-						onClick="form.action='/deleteCompteTo';submit();">Delete
-						the contact</button>
+						onClick="form.action='/removeContactAccount';submit();">Remove a contact</button>
 				</div>
 			</div>
 		</div>

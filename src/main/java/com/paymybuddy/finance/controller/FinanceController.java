@@ -1,5 +1,7 @@
 package com.paymybuddy.finance.controller;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -43,12 +45,15 @@ public class FinanceController {
 
     @PostMapping("/gotoContact")
     public String contact(Model model, @ModelAttribute("person") Person person) {
-	ContactDTO contactDTO = new ContactDTO();
-	contactDTO.setAllAccounts(accountService.findAllAccountsExceptPersonAccounts(person));
-	model.addAttribute("contactDTO", contactDTO);
 
 	person = personService.findFetchWithAllPersonByName(person.getName());
 	model.addAttribute("person", person);
+
+	List<Account> accounts = accountService.findAllAccountsExceptPersonAccounts(person);
+	accounts.removeAll(person.getContactAccounts());
+	ContactDTO contactDTO = new ContactDTO();
+	model.addAttribute("contactDTO", contactDTO);
+	contactDTO.setAllAccounts(accounts);
 
 	return "contact";
     }
@@ -61,20 +66,12 @@ public class FinanceController {
     @PostMapping("/transfer")
     public String transfer(Model model, @ModelAttribute("person") Person person,
 	    @ModelAttribute("transerDTO") TransferDTO transferDTO) {
-	boolean dataOk = true;
-	if (transferDTO.getAccountFromId() == null) {
-	    dataOk = false;
-	    model.addAttribute("selectAccountFrom", true);
-	} else if (transferDTO.getAccountToId() == null) {
-	    dataOk = false;
-	    model.addAttribute("selectAccountTo", true);
-	} else if (transferDTO.getAccountToId() == transferDTO.getAccountFromId()) {
-	    dataOk = false;
-	    model.addAttribute("accountsMustBeDifferent", true);
-	}
 
-	if (dataOk) {
+	List<String> errors = financeService.validateCreateTransaction(person, transferDTO);
+	if (errors.isEmpty()) {
 	    financeService.createTransaction(person, transferDTO);
+	} else {
+	    errors.forEach(e -> model.addAttribute(e, true));
 	}
 
 	person = personService.findFetchWithAllPersonByName(person.getName());
@@ -84,53 +81,46 @@ public class FinanceController {
 	return "transfer";
     }
 
-    @PostMapping("/addCompteTo")
-    public String addCompteTo(Model model, @ModelAttribute("person") Person person,
+    @PostMapping("/addContactAccount")
+    public String addContactAccountTo(Model model, @ModelAttribute("person") Person person,
 	    @ModelAttribute("contactDTO") ContactDTO contactDTO) {
 
-	boolean dataOk = true;
-	if (contactDTO.getContactAccountIdToAdd() == null) {
-	    dataOk = false;
-	    model.addAttribute("selectAccountToAdd", true);
-	}
-	if (dataOk) {
-	    Account accountToAdd = accountService.findAccountById(contactDTO.getContactAccountIdToAdd());
-	    if (person.getContactAccounts().contains(accountToAdd)) {
-		dataOk = false;
-		model.addAttribute("accountAlreadyExists", true);
-	    }
-	}
-
-	if (dataOk) {
+	List<String> errors = accountService.validateCreateContactAccount(person, contactDTO);
+	if (errors.isEmpty()) {
 	    accountService.createContactAccount(person, contactDTO);
+	} else {
+	    errors.forEach(e -> model.addAttribute(e, true));
 	}
 
 	person = personService.findFetchWithAllPersonByName(person.getName());
 	model.addAttribute("person", person);
 
-	contactDTO.setAllAccounts(accountService.findAllAccountsExceptPersonAccounts(person));
+	List<Account> accounts = accountService.findAllAccountsExceptPersonAccounts(person);
+	accounts.removeAll(person.getContactAccounts());
 	model.addAttribute("contactDTO", contactDTO);
+	contactDTO.setAllAccounts(accounts);
+
 	return "contact";
     }
 
-    @PostMapping("/deleteCompteTo")
-    public String deleteCompteTo(Model model, @ModelAttribute("person") Person person,
+    @PostMapping("/removeContactAccount")
+    public String removeContactAccount(Model model, @ModelAttribute("person") Person person,
 	    @ModelAttribute("contactDTO") ContactDTO contactDTO) {
-	boolean dataOk = true;
-	if (contactDTO.getContactAccountIdToRemove() == null) {
-	    dataOk = false;
-	    model.addAttribute("selectAccountToRemove", true);
-	}
 
-	if (dataOk) {
+	List<String> errors = accountService.validateRemoveContactAccount(person, contactDTO);
+	if (errors.isEmpty()) {
 	    accountService.removeContactAccount(person, contactDTO);
+	} else {
+	    errors.forEach(e -> model.addAttribute(e, true));
 	}
 
 	person = personService.findFetchWithAllPersonByName(person.getName());
 	model.addAttribute("person", person);
 
-	contactDTO.setAllAccounts(accountService.findAllAccountsExceptPersonAccounts(person));
+	List<Account> accounts = accountService.findAllAccountsExceptPersonAccounts(person);
+	accounts.removeAll(person.getContactAccounts());
 	model.addAttribute("contactDTO", contactDTO);
+	contactDTO.setAllAccounts(accounts);
 
 	return "contact";
     }

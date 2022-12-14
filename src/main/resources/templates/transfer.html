@@ -70,6 +70,14 @@
 			<div th:if="${accountsMustBeDifferent}"
 				class="mb-5 alert alert-success text-danger">The accounts must
 				be different</div>
+			<div th:if="${transactionMustBeFromBuddyAccount}"
+				class="mb-5 alert alert-success text-danger">
+				With final PayMyBuddy account, the origin account must be a PayMyBuddy account</div>	
+			<div th:if="originAccountAmountNotSufficient"
+				class="mb-5 alert alert-success text-danger">
+				The origin account has not a sufficient amount</div>	
+				
+				
 		</div>
 		<div class="mb-3 d-flex mx-auto  w-50">
 			<button type="button" class="btn btn-light btn-group-small btn"
@@ -77,7 +85,7 @@
 			<select class="form-select" th:field="${transferDTO.accountFromId}">
 				<option value="">Select an account</option>
 				<option th:each="account : *{accounts}" th:value="${account.id}"
-					th:text="${account.person.name} + ' : ' +  ${account.bank.name}"></option>
+					th:text="${account.person.name} + ' : ' +  ${account.bank.name} + ' : ' +  ${account.amount} + '€' "></option>
 			</select>
 		</div>
 		<div class="mb-3 d-flex mx-auto  w-50">
@@ -88,7 +96,7 @@
 			<select class="form-select" th:field="${transferDTO.accountToId}">
 				<option value="">Select an account</option>
 				<option th:each="account : *{accounts}" th:value="${account.id}"
-					th:text="${account.person.name} + ' : '  + ${account.bank.name}"></option>
+					th:text="${account.person.name} + ' : '  + ${account.bank.name} + ' : ' +  ${account.amount} + '€' "></option>
 				<option th:each="account : *{contactAccounts}"
 					th:value="${account.id}" th:text="${account.person.name}"></option>
 			</select>
@@ -114,21 +122,21 @@
 		<div class="mb-3 mx-auto d-flex justify-content-center">
 			<table class="table-striped table-bordered">
 				<tr class="bg-success">
-					<th>Date</th>
-					<th>From</th>
-					<th>To</th>
-					<th>Description</th>
-					<th>Amount</th>
-					<th>Type</th>
+					<th class="text-center">Date</th>
+					<th class="text-center">From</th>
+					<th class="text-center">To</th>
+					<th class="text-center">Description</th>
+					<th class="text-center">Amount</th>
+					<th class="text-center">Type</th>
 				</tr>
 				<tr th:each="transaction : *{transactions}">
-					<td th:text="${transaction.transactionDate}"></td>
+					<td th:text="${#temporals.format(transaction.transactionDate, 'dd/MM/yyyy HH:mm:ss')}"></td>					
 					<td
 						th:text="${transaction.accountFrom.person.name} + ' : ' + ${transaction.accountFrom.bank.name}"></td>
 					<td
 						th:text="${transaction.accountTo.person.name}  + ' : ' +  ${transaction.accountTo.bank.name}">></td>
 					<td th:text="${transaction.description}"></td>
-					<td th:text="${transaction.amount}"></td>
+					<td style="text-align: right" th:text="${transaction.amount}"></td>
 					<td th:text="${transaction.transactionType.toString()}"></td>
 				</tr>
 			</table>
