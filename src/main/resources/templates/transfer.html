@@ -15,7 +15,7 @@
 <link rel="stylesheet"
 	href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">
 </head>
-<body>
+<body style="text-align:center;">
 	<form class="p-3 bg-light" action="#" th:action="@{/transfer}"
 		th:object="${person}" method="post">
 
@@ -79,7 +79,7 @@
 				
 				
 		</div>
-		<div class="mb-3 d-flex mx-auto  w-50">
+		<div class="mb-3 d-flex mx-auto  w-100">
 			<button type="button" class="btn btn-light btn-group-small btn"
 				disabled>From</button>
 			<select class="form-select" th:field="${transferDTO.accountFromId}">
@@ -87,12 +87,8 @@
 				<option th:each="account : *{accounts}" th:value="${account.id}"
 					th:text="${account.person.name} + ' : ' +  ${account.bank.name} + ' : ' +  ${account.amount} + '€' "></option>
 			</select>
-		</div>
-		<div class="mb-3 d-flex mx-auto  w-50">
 			<button type="button" class="btn btn-light btn-group-small btn"
 				disabled>To</button>
-			<button type="button" class="btn btn-light btn-group-small btn"
-				disabled></button>
 			<select class="form-select" th:field="${transferDTO.accountToId}">
 				<option value="">Select an account</option>
 				<option th:each="account : *{accounts}" th:value="${account.id}"
@@ -100,35 +96,34 @@
 				<option th:each="account : *{contactAccounts}"
 					th:value="${account.id}" th:text="${account.person.name}"></option>
 			</select>
-		</div>
-		<div class="mb-3 d-flex mx-auto w-50">
 			<button type="button" class="btn btn-light btn-group-small btn"
 				disabled>Amount</button>
 			<input type="number" id="amount" th:field="${transferDTO.amount}"
-				name="tentacles" min="0" step="100" value="100">
+				name="tentacles" min="0" step="100" value="100" style="width:80px;">
 			<button type="button" class="btn btn-light btn-group-small btn"
 				disabled>Description</button>
 			<input type="text" id="description"
-				th:field="${transferDTO.description}" value="Virement">
-		</div>
-		<div class="mb-3 d-flex mx-auto justify-content-center">
+				th:field="${transferDTO.description}" value="Virement" style="width:120px;">
+			<button type="button" class="btn btn-light btn-group-small btn"
+				disabled></button>	
 			<button type="submit" class="btn btn-success btn-group-small">Pay</button>
 		</div>
-
 		<div class="mb-3 d-flex mx-auto justify-content-center">
 			<button type="button" class="btn btn-light btn-group-small btn"
 				disabled>My Transactions</button>
 		</div>
-		<div class="mb-3 mx-auto d-flex justify-content-center">
-			<table class="table-striped table-bordered">
-				<tr class="bg-success">
-					<th class="text-center">Date</th>
-					<th class="text-center">From</th>
-					<th class="text-center">To</th>
-					<th class="text-center">Description</th>
-					<th class="text-center">Amount</th>
-					<th class="text-center">Type</th>
-				</tr>
+		<div class="mb-3 mx-auto justify-content-center overflow-auto" style="display:inline-block;width:1000px;height:350px;min-height:0px;max-height:350px">
+			<table class="table-striped table-bordered table-sm">
+			    <div th:if="${!person.transactions.isEmpty()}" > 
+					<tr class="bg-success" style="position:sticky;top:0;z-index: 1;">
+						<th class="text-center">Date</th>
+						<th class="text-center">From</th>
+						<th class="text-center">To</th>
+						<th class="text-center">Description</th>
+						<th class="text-center">Amount</th>
+						<th class="text-center">Type</th>
+					</tr>
+				</div>	
 				<tr th:each="transaction : *{transactions}">
 					<td th:text="${#temporals.format(transaction.transactionDate, 'dd/MM/yyyy HH:mm:ss')}"></td>					
 					<td
@@ -140,24 +135,7 @@
 					<td th:text="${transaction.transactionType.toString()}"></td>
 				</tr>
 			</table>
-		</div>
-		<div class="mb-3 mx-auto d-flex justify-content-center">
-			<nav aria-label="Page navigation example">
-				<ul class="pagination justify-content-center">
-					<li class="page-item"><a class="page-link" href="#"
-						aria-label="Previous"> <span aria-hidden="true">&laquo;</span>
-					</a></li>
-					<li class="page-item"><a class="page-link" href="#">1</a></li>
-					<li class="page-item"><a class="page-link" href="#">2</a></li>
-					<li class="page-item"><a class="page-link" href="#">3</a></li>
-					<li class="page-item"><a class="page-link" href="#">4</a></li>
-					<li class="page-item"><a class="page-link" href="#">5</a></li>
-					<li class="page-item"><a class="page-link" href="#"
-						aria-label="Next"> <span aria-hidden="true">&raquo;</span>
-					</a></li>
-				</ul>
-			</nav>
-		</div>
+		</div>		
 	</form>
 	<script
 		src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js">
