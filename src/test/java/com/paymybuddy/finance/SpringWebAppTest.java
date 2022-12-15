@@ -15,6 +15,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.List;
 import java.util.Set;
 
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -49,15 +50,13 @@ public class SpringWebAppTest {
     private static final int AMOUNT_1000 = 1000;
     private static final int AMOUNT_5000 = 5000;
     private static final int AMOUNT_10000 = 10000;
-    private static final String FRIEND_EMAIL = "friend.friend@friend.com";
-    private static final String FRIEND = "Friend";
-    private static final String USER_EMAIL = "user@user.com";
-    private static final String USER = "user";
+    private static final String OAUTH2 = "oauth2@oauth2.com";
+    private static final String SECURE_USER = "user@user.com";
 
     // Some Objects are created at initialization
     private static final int OFFSET_BANK = 2;
     private static final int OFFSET_PERSON = 1;
-    private static final int OFFSET_ACCOUNT = 1;
+    private static int OFFSET_ACCOUNT = 1;
 
     @Autowired
     MockMvc mvc;
@@ -81,8 +80,14 @@ public class SpringWebAppTest {
     ITransactionService transactionService;
 
     @BeforeAll
-    public void setUp() {
+    public void beforeAll() {
+	financeService.deleteAll();
 	financeService.initApplication();
+    }
+
+    @AfterAll
+    public void afterAll() {
+	financeService.deleteAll();
     }
 
     @Test
@@ -101,15 +106,17 @@ public class SpringWebAppTest {
     @Order(1)
     public void testCreatePersons() {
 	// WHEN
-	personService.createPerson(USER, USER_EMAIL);
-	personService.createPerson(FRIEND, FRIEND_EMAIL);
+	financeService.createSecurePerson(SECURE_USER, "password");
+	OFFSET_ACCOUNT += 2;
+
+	personService.createPerson(OAUTH2, OAUTH2);
 
 	// THEN
 	assertTrue(personService.findAllPersons().size() == OFFSET_PERSON + 2);
-	assertNotNull(personService.findPersonByName(FRIEND));
-	assertNotNull(personService.findFetchWithContactAccountsPersonByName(FRIEND));
-	assertNotNull(personService.findFetchWithAccountsTransactionsPersonByName(FRIEND));
-	assertNotNull(personService.findFetchWithAllPersonByName(FRIEND));
+	assertNotNull(personService.findPersonByName(OAUTH2));
+	assertNotNull(personService.findFetchWithContactAccountsPersonByName(OAUTH2));
+	assertNotNull(personService.findFetchWithAccountsTransactionsPersonByName(OAUTH2));
+	assertNotNull(personService.findFetchWithAllPersonByName(OAUTH2));
     }
 
     @Test
@@ -128,30 +135,28 @@ public class SpringWebAppTest {
     public void testCreateAccounts() {
 
 	// GIVEN
-	Person user = personService.findFetchWithAccountsPersonByName(USER);
-	Person friend = personService.findFetchWithAccountsPersonByName(FRIEND);
+	Person user = personService.findFetchWithAccountsPersonByName(SECURE_USER);
+	Person oauth2User = personService.findFetchWithAccountsPersonByName(OAUTH2);
 
 	Bank bankGeneric = bankService.findWithAccountsBankByName(USER_GENERIC_BANK);
 	Bank bankPayMyBuddy = bankService.findWithAccountsBankByName(PAY_MY_BUDDY_BANK);
 
-	accountService.createAccount(10000, user, bankGeneric);
-	accountService.createAccount(0, user, bankPayMyBuddy);
-
 	// WHEN
-	accountService.createAccount(10000, friend, bankPayMyBuddy);
+	// Manually create accounts for FRIEND
+	accountService.createAccount(10000, oauth2User, bankPayMyBuddy);
 
 	// THEN
-	assertTrue(accountService.findAllAccounts().size() == OFFSET_ACCOUNT + 3);
-	assertNotNull(accountService.findAccountByPersonNameAndBankName(USER,
+	assertThat(accountService.findAllAccounts().size()).isEqualTo(OFFSET_ACCOUNT + 1);
+	assertNotNull(accountService.findAccountByPersonNameAndBankName(SECURE_USER,
 		PAY_MY_BUDDY_BANK));
-	assertNotNull(accountService.findFetchTransactionsAccountByPersonNameAndBankName(USER,
+	assertNotNull(accountService.findFetchTransactionsAccountByPersonNameAndBankName(SECURE_USER,
 		PAY_MY_BUDDY_BANK));
-	assertNotNull(accountService.findFetchWithContactPersonsAccountByPersonNameAndBankName(USER,
+	assertNotNull(accountService.findFetchWithContactPersonsAccountByPersonNameAndBankName(SECURE_USER,
 		PAY_MY_BUDDY_BANK));
 
 	assertTrue(bankPayMyBuddy.getAccounts().size() == 3);
 	assertTrue(user.getAccounts().size() == 2);
-	assertTrue(friend.getAccounts().size() == 1);
+	assertTrue(oauth2User.getAccounts().size() == 1);
     }
 
     @Test
@@ -162,10 +167,10 @@ public class SpringWebAppTest {
 
 	// GIVEN
 	Account accountUserPayMyBuddy = accountService.findFetchTransactionsAccountByPersonNameAndBankName(
-		USER,
+		SECURE_USER,
 		PAY_MY_BUDDY_BANK);
 	Account accountUserGeneric = accountService.findFetchTransactionsAccountByPersonNameAndBankName(
-		USER,
+		SECURE_USER,
 		USER_GENERIC_BANK);
 
 	assertNotNull(accountUserPayMyBuddy);
@@ -192,17 +197,17 @@ public class SpringWebAppTest {
 	// BUDDY TO BUDDY TRANSACTION
 
 	// GIVEN
-	Account accountFriendPayMyBuddy = accountService.findFetchTransactionsAccountByPersonNameAndBankName(FRIEND,
+	Account accountOauth2UserPayMyBuddy = accountService.findFetchTransactionsAccountByPersonNameAndBankName(OAUTH2,
 		PAY_MY_BUDDY_BANK);
 
 	assertNotNull(accountUserPayMyBuddy);
-	assertNotNull(accountFriendPayMyBuddy);
+	assertNotNull(accountOauth2UserPayMyBuddy);
 	assertTrue(accountUserPayMyBuddy.getAmount() == AMOUNT_5000);
-	assertTrue(accountFriendPayMyBuddy.getAmount() == AMOUNT_10000);
+	assertTrue(accountOauth2UserPayMyBuddy.getAmount() == AMOUNT_10000);
 
 	// WHEN
 	transactions = financeService.createTransactions(accountUserPayMyBuddy,
-		accountFriendPayMyBuddy, AMOUNT_1000, "virement My Buddy -> My Buddy");
+		accountOauth2UserPayMyBuddy, AMOUNT_1000, "virement My Buddy -> My Buddy");
 
 	// THEN
 	Account genericAccountPayMyBuddy = accountService.findFetchTransactionsAccountByPersonNameAndBankName(
@@ -214,7 +219,7 @@ public class SpringWebAppTest {
 	Transaction transactionCommission = transactions.get(1);
 
 	assertTrue(accountUserPayMyBuddy.getAmount() == AMOUNT_5000 - (1 + Constants.COMMISSION_RATE) * AMOUNT_1000);
-	assertTrue(accountFriendPayMyBuddy.getAmount() == AMOUNT_10000 + AMOUNT_1000);
+	assertTrue(accountOauth2UserPayMyBuddy.getAmount() == AMOUNT_10000 + AMOUNT_1000);
 	assertTrue(genericAccountPayMyBuddy.getAmount() == Constants.COMMISSION_RATE * AMOUNT_1000);
 
 	assertTrue(transactionService.findAllTransactions().size() == 3);
@@ -234,9 +239,9 @@ public class SpringWebAppTest {
     @Order(5)
     public void testCreateContactAccount() {
 	// GIVEN
-	Person person = personService.findFetchWithContactAccountsPersonByName(USER);
+	Person person = personService.findFetchWithContactAccountsPersonByName(SECURE_USER);
 	Account accountFriendPayMyBuddy = accountService.findFetchWithContactPersonsAccountByPersonNameAndBankName(
-		FRIEND,
+		OAUTH2,
 		PAY_MY_BUDDY_BANK);
 	assertNotNull(person);
 	assertNotNull(accountFriendPayMyBuddy);
@@ -252,9 +257,9 @@ public class SpringWebAppTest {
     @Order(6)
     public void testRemoveContactAccount() {
 	// GIVEN
-	Person person = personService.findFetchWithContactAccountsPersonByName(USER);
+	Person person = personService.findFetchWithContactAccountsPersonByName(SECURE_USER);
 	Account accountFriendPayMyBuddy = accountService.findFetchWithContactPersonsAccountByPersonNameAndBankName(
-		FRIEND,
+		OAUTH2,
 		PAY_MY_BUDDY_BANK);
 	assertNotNull(person);
 	assertNotNull(accountFriendPayMyBuddy);

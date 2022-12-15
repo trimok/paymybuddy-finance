@@ -10,27 +10,46 @@ import com.paymybuddy.finance.model.Transaction;
 import com.paymybuddy.finance.repository.AccountRepository;
 import com.paymybuddy.finance.repository.TransactionRepository;
 
+/**
+ * @author trimok
+ *
+ */
 @Service
 public class TransactionService implements ITransactionService {
 
+    /**
+     * transactionRepository
+     */
     @Autowired
     TransactionRepository transactionRepository;
 
+    /**
+     * accountRepository
+     */
     @Autowired
     AccountRepository accountRepository;
 
+    /**
+     * Saving a transaction
+     */
     @Override
     @Transactional(readOnly = true, noRollbackFor = Exception.class)
     public Transaction saveTransaction(Transaction transaction) {
 	return transactionRepository.save(transaction);
     }
 
+    /**
+     * findAllTransactions
+     */
     @Override
     @Transactional(readOnly = true, noRollbackFor = Exception.class)
     public List<Transaction> findAllTransactions() {
 	return transactionRepository.findAll();
     }
 
+    /**
+     * deleteAllTransactions
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void deleteAllTransactions() {

@@ -15,11 +15,21 @@ import com.paymybuddy.finance.model.Person;
 
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * @author trimok
+ *
+ */
 @Service
 @Slf4j
 public class LoginService implements ILoginService {
 
-    // Get a identification token from an authentication token
+    /**
+     * 
+     * Get a identification token from an authentication token
+     * 
+     * @param authToken : the authorization token
+     * @return : the identifiation token
+     */
     private OidcIdToken getIdToken(OAuth2AuthenticationToken authToken) {
 	OAuth2User principal = authToken.getPrincipal();
 	if (principal instanceof DefaultOidcUser) {
@@ -29,7 +39,9 @@ public class LoginService implements ILoginService {
 	return null;
     }
 
-    // Building a PersonMemory Object from a Principal
+    /**
+     * Building a Person Object from a Principal
+     */
     public Person getPersonFromPrincipal(Principal user) {
 	Person person = null;
 
@@ -44,7 +56,13 @@ public class LoginService implements ILoginService {
 	return person;
     }
 
-    // OAuth2 / OIDC login
+    /**
+     * 
+     * OAuth2 / OIDC login Getting a Person object from a Principal
+     * 
+     * @param user
+     * @return
+     */
     public Person getOauth2UserId(Principal user) {
 	Person person = new Person();
 
@@ -100,7 +118,13 @@ public class LoginService implements ILoginService {
 	return person;
     }
 
-    // Basic login
+    /**
+     * Getting a Person object from a Principal Basic login (login after
+     * registration)
+     * 
+     * @param principal : the principal
+     * @return : a Person object
+     */
     public Person getUserId(Principal principal) {
 	Person person = new Person();
 	// Get the authentication token

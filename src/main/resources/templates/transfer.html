@@ -73,7 +73,7 @@
 			<div th:if="${transactionMustBeFromBuddyAccount}"
 				class="mb-5 alert alert-success text-danger">
 				With final PayMyBuddy account, the origin account must be a PayMyBuddy account</div>	
-			<div th:if="originAccountAmountNotSufficient"
+			<div th:if="${originAccountAmountNotSufficient}"
 				class="mb-5 alert alert-success text-danger">
 				The origin account has not a sufficient amount</div>	
 				

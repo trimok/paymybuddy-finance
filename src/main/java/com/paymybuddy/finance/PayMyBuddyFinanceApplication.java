@@ -16,13 +16,22 @@ import com.paymybuddy.finance.service.IFinanceService;
 @SpringBootApplication
 public class PayMyBuddyFinanceApplication {
 
+    /**
+     * Finance Service
+     */
     @Autowired
     IFinanceService financeService;
 
+    /**
+     * @param args : application command line
+     */
     public static void main(String[] args) {
 	SpringApplication.run(PayMyBuddyFinanceApplication.class, args);
     }
 
+    /**
+     * Initialisation of the application
+     */
     @EventListener(ApplicationReadyEvent.class)
     public void init() {
 	financeService.initApplication();

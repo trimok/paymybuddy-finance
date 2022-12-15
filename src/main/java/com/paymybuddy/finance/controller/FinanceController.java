@@ -17,55 +17,88 @@ import com.paymybuddy.finance.service.IAccountService;
 import com.paymybuddy.finance.service.IFinanceService;
 import com.paymybuddy.finance.service.IPersonService;
 
+/**
+ * @author trimok
+ *
+ */
 @Controller
 @SessionAttributes(value = { "person" })
 public class FinanceController {
 
+    /**
+     * The finance service
+     */
     @Autowired
     private IFinanceService financeService;
 
+    /**
+     * The person service
+     */
     @Autowired
     private IPersonService personService;
 
+    /**
+     * The account service
+     */
     @Autowired
     private IAccountService accountService;
 
+    /**
+     * @return the home page
+     */
     @PostMapping("/gotoHome")
     public String home() {
 	return "home";
     }
 
-    @PostMapping("/gotoTransfer")
-    public String transfer(Model model, @ModelAttribute("person") Person person) {
-	person = personService.findFetchWithAllPersonByName(person.getName());
-	model.addAttribute("person", person);
-	model.addAttribute("transferDTO", new TransferDTO());
-	return "transfer";
-    }
-
-    @PostMapping("/gotoContact")
-    public String contact(Model model, @ModelAttribute("person") Person person) {
-
-	person = personService.findFetchWithAllPersonByName(person.getName());
-	model.addAttribute("person", person);
-
-	List<Account> accounts = accountService.findAllAccountsExceptPersonAccounts(person);
-	accounts.removeAll(person.getContactAccounts());
-	ContactDTO contactDTO = new ContactDTO();
-	model.addAttribute("contactDTO", contactDTO);
-	contactDTO.setAllAccounts(accounts);
-
-	return "contact";
-    }
-
+    /**
+     * @return th provile page
+     */
     @PostMapping("/gotoProfile")
     public String profile() {
 	return "profile";
     }
 
+    /**
+     * Initialisations for transfer page
+     * 
+     * @param model       : the model
+     * @param person      : the person
+     * @param transferDTO : the transfer DTO
+     */
+    private void initModelTransfer(Model model, Person person, TransferDTO transferDTO) {
+	person = personService.findFetchWithAllPersonByName(person.getName());
+	model.addAttribute("person", person);
+
+	model.addAttribute("transferDTO", transferDTO);
+    }
+
+    /**
+     * @param model       : the model
+     * @param person      : the person
+     * @param transferDTO : the transfer DTO
+     * @return : the transfer page
+     */
+    @PostMapping("/gotoTransfer")
+    public String goToTransfer(Model model, @ModelAttribute("person") Person person,
+	    @ModelAttribute("transferDTO") TransferDTO transferDTO) {
+
+	initModelTransfer(model, person, transferDTO);
+
+	return "transfer";
+    }
+
+    /**
+     * Transaction operation
+     * 
+     * @param model       : the model
+     * @param person      : the person
+     * @param transferDTO : the transfer DTO
+     * @return : the transfer page
+     */
     @PostMapping("/transfer")
     public String transfer(Model model, @ModelAttribute("person") Person person,
-	    @ModelAttribute("transerDTO") TransferDTO transferDTO) {
+	    @ModelAttribute("transferDTO") TransferDTO transferDTO) {
 
 	List<String> errors = financeService.validateCreateTransaction(person, transferDTO);
 	if (errors.isEmpty()) {
@@ -74,13 +107,51 @@ public class FinanceController {
 	    errors.forEach(e -> model.addAttribute(e, true));
 	}
 
-	person = personService.findFetchWithAllPersonByName(person.getName());
-	model.addAttribute("person", person);
+	initModelTransfer(model, person, transferDTO);
 
-	model.addAttribute("transferDTO", transferDTO);
 	return "transfer";
     }
 
+    /**
+     * Initializations for contact page
+     *
+     * @param model      : the model
+     * @param person     : the person
+     * @param contactDTO : the contactDTO
+     */
+    private void initModelContact(Model model, Person person, ContactDTO contactDTO) {
+	person = personService.findFetchWithAllPersonByName(person.getName());
+	model.addAttribute("person", person);
+
+	List<Account> accounts = accountService.findAllAccountsExceptPersonAccounts(person);
+	accounts.removeAll(person.getContactAccounts());
+	model.addAttribute("contactDTO", contactDTO);
+	contactDTO.setAllAccounts(accounts);
+    }
+
+    /**
+     * @param model      : the model
+     * @param person     : the person
+     * @param contactDTO : the contactDTO
+     * @return : the contact page
+     */
+    @PostMapping("/gotoContact")
+    public String goToContact(Model model, @ModelAttribute("person") Person person,
+	    @ModelAttribute("contactDTO") ContactDTO contactDTO) {
+
+	initModelContact(model, person, contactDTO);
+
+	return "contact";
+    }
+
+    /**
+     * Adding a contact account
+     * 
+     * @param model      : the model
+     * @param person     : the person
+     * @param contactDTO : the contactDTO
+     * @return : the contact page
+     */
     @PostMapping("/addContactAccount")
     public String addContactAccountTo(Model model, @ModelAttribute("person") Person person,
 	    @ModelAttribute("contactDTO") ContactDTO contactDTO) {
@@ -92,16 +163,19 @@ public class FinanceController {
 	    errors.forEach(e -> model.addAttribute(e, true));
 	}
 
-	person = personService.findFetchWithAllPersonByName(person.getName());
-	model.addAttribute("person", person);
-
-	List<Account> accounts = accountService.findAllAccountsExceptPersonAccounts(person);
-	accounts.removeAll(person.getContactAccounts());
-	model.addAttribute("contactDTO", contactDTO);
-	contactDTO.setAllAccounts(accounts);
+	initModelContact(model, person, contactDTO);
 
 	return "contact";
     }
+
+    /**
+     * Removing a contact account
+     * 
+     * @param model      : the model
+     * @param person     : the person
+     * @param contactDTO : the contactDTO
+     * @return : the contact page
+     */
 
     @PostMapping("/removeContactAccount")
     public String removeContactAccount(Model model, @ModelAttribute("person") Person person,
@@ -114,13 +188,7 @@ public class FinanceController {
 	    errors.forEach(e -> model.addAttribute(e, true));
 	}
 
-	person = personService.findFetchWithAllPersonByName(person.getName());
-	model.addAttribute("person", person);
-
-	List<Account> accounts = accountService.findAllAccountsExceptPersonAccounts(person);
-	accounts.removeAll(person.getContactAccounts());
-	model.addAttribute("contactDTO", contactDTO);
-	contactDTO.setAllAccounts(accounts);
+	initModelContact(model, person, contactDTO);
 
 	return "contact";
     }

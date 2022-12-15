@@ -6,12 +6,22 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.paymybuddy.finance.repository.RoleRepository;
 
+/**
+ * @author trimok
+ *
+ */
 @Service
 public class RoleService implements IRoleService {
 
+    /**
+     * roleRepository
+     */
     @Autowired
     private RoleRepository roleRepository;
 
+    /**
+     * deleteAllRoles
+     */
     @Override
     @Transactional(readOnly = true, noRollbackFor = Exception.class)
     public void deleteAllRoles() {

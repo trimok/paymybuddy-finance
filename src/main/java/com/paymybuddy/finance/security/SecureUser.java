@@ -14,18 +14,29 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Getter
+/**
+ * @author trimok
+ *
+ */
 @Setter
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor
 public class SecureUser implements UserDetails {
 
     /**
+     * serialVersionUID
      * 
      */
     private static final long serialVersionUID = 1L;
+    /**
+     * userLogin
+     */
     private UserLoginDTO userLogin = null;
 
+    /**
+     * authorities
+     */
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
 	GrantedAuthority authority = new SimpleGrantedAuthority("ROLE_USER");
@@ -33,31 +44,49 @@ public class SecureUser implements UserDetails {
 	return Arrays.asList(authority);
     }
 
+    /**
+     * password
+     */
     @Override
     public String getPassword() {
 	return userLogin.getPassword();
     }
 
+    /**
+     * username
+     */
     @Override
     public String getUsername() {
 	return userLogin.getUsername();
     }
 
+    /**
+     * isAccountNonExpired
+     */
     @Override
     public boolean isAccountNonExpired() {
 	return true;
     }
 
+    /**
+     * isAccountNonLocked
+     */
     @Override
     public boolean isAccountNonLocked() {
 	return true;
     }
 
+    /**
+     * isCredentialsNonExpired
+     */
     @Override
     public boolean isCredentialsNonExpired() {
 	return true;
     }
 
+    /**
+     * isEnabled
+     */
     @Override
     public boolean isEnabled() {
 	return true;

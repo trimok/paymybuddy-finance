@@ -4,8 +4,7 @@ import java.security.Principal;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.JdbcUserDetailsManager;
+import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,47 +13,71 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.SessionAttributes;
 
-import com.paymybuddy.finance.dto.UserLoginDTO;
 import com.paymybuddy.finance.model.Person;
-import com.paymybuddy.finance.security.SecureUser;
 import com.paymybuddy.finance.service.IFinanceService;
 import com.paymybuddy.finance.service.ILoginService;
 import com.paymybuddy.finance.service.IPersonService;
 
+/**
+ * @author trimok
+ *
+ */
 @Controller
 @SessionAttributes(value = { "person" })
 public class LoginController {
+    /**
+     * The login service
+     */
     @Autowired
     private ILoginService loginService;
 
+    /**
+     * The finance service
+     */
     @Autowired
     private IFinanceService financeService;
 
+    /**
+     * The person service
+     */
     @Autowired
     private IPersonService personService;
 
+    /**
+     * The environment
+     */
     @Autowired
     private Environment env;
 
+    /**
+     * The UserDetailsManager
+     */
     @Autowired
-    private JdbcUserDetailsManager userDetailsManager;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    private UserDetailsManager userDetailsManager;
 
     // Login Callback
+    /**
+     * General login callback for authentification
+     * 
+     * @param model           : the model
+     * @param user            : the Principal
+     * @param personAttribute : the Person session object
+     * @return : the next page (login, home)
+     */
     @GetMapping("/*")
     public String getUserInfo(Model model, Principal user, @ModelAttribute("person") Person personAttribute) {
 	if (personAttribute.getName() != null) {
 	    // Should never happen
-	    return "login";
+	    return "home";
 	} else {
 
-	    // Authorization
+	    // Authorization (Standard, OAuth2, OpenIDC)
 	    Person person = loginService.getPersonFromPrincipal(user);
 
 	    if (person != null) {
+		// If needed (Oauth2, OpenIDC) Person initialization (creating account)
 		person = financeService.initPerson(person);
+
 		person = personService.findFetchWithAllPersonByName(person.getName());
 		model.addAttribute("person", person);
 		return "home";
@@ -66,6 +89,12 @@ public class LoginController {
 	}
     }
 
+    /**
+     * First connexion to login page
+     * 
+     * @param model : the model
+     * @return : the login page
+     */
     @GetMapping("/login")
     public String login(Model model) {
 
@@ -81,32 +110,49 @@ public class LoginController {
 	return "login";
     }
 
+    /**
+     * Connexion to the registerNewUser page
+     * 
+     * @return : the registerNewUser page
+     */
     @GetMapping(value = "/registerNewUser")
     public String goToRegisterNewUser() {
 	return "registerNewUser";
     }
 
+    /**
+     * Registering of a new user
+     * 
+     * @param model           : the model
+     * @param username        : the username
+     * @param password        : the password
+     * @param confirmPassword : the confirmationof the passwoed
+     * @return : next page (registerNewUser or login)
+     */
     @PostMapping(value = "/registerNewUser")
     public String registerNewUser(Model model, @RequestParam String username, @RequestParam String password,
 	    @RequestParam String confirmPassword) {
 
-	if (!password.equals(confirmPassword)) {
-	    model.addAttribute("passwordsDontMatch", true);
-	    model.addAttribute("username", username);
-	    return "registerNewUser";
-	}
-
-	UserLoginDTO userLogin = new UserLoginDTO(username, password);
-	userLogin.setPassword(passwordEncoder.encode(userLogin.getPassword()));
-
 	model.addAttribute("username", username);
 
-	if (userDetailsManager.userExists(username)) {
+	if (!password.equals(confirmPassword)) {
+	    model.addAttribute("passwordsDontMatch", true);
+
+	    return "registerNewUser";
+	} else if (userDetailsManager.userExists(username)) {
 	    model.addAttribute("userAlreadyRegistered", true);
+
 	    return "login";
 	} else {
-	    userDetailsManager.createUser(new SecureUser(userLogin));
+
+	    // User secure creation
+	    financeService.createSecurePerson(username, password);
+
 	    model.addAttribute("userSuccessfullyRegistered", true);
+
+	    // To avoid error message logs (need session attributes)
+	    model.addAttribute("person", new Person());
+
 	    return "login";
 	}
     }
