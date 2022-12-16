@@ -51,7 +51,7 @@ public class PayMyBuddyJdbcUserDetailsManager extends JdbcUserDetailsManager {
     @Override
     public void createUser(final UserDetails userDetails) {
 
-	SecureUser user = (SecureUser) userDetails;
+	PayMyBuddyUserDetails user = (PayMyBuddyUserDetails) userDetails;
 	getJdbcTemplate().update(CREATE_USER_QUERY, (ps) -> {
 	    ps.setString(1, user.getUsername());
 	    ps.setString(2, user.getEmail());

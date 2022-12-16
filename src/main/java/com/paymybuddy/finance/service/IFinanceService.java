@@ -7,7 +7,7 @@ import com.paymybuddy.finance.model.Account;
 import com.paymybuddy.finance.model.Person;
 import com.paymybuddy.finance.model.Transaction;
 import com.paymybuddy.finance.model.Transaction.TransactionType;
-import com.paymybuddy.finance.security.SecureUser;
+import com.paymybuddy.finance.security.PayMyBuddyUserDetails;
 
 /**
  * @author trimok
@@ -77,8 +77,8 @@ public interface IFinanceService {
     /**
      * Creation of a secure Person (Person + password + Role)
      * 
-     * @param secureUser : secureUser
+     * @param userDetails : userDetails
      * @return : a Person
      */
-    Person createSecurePerson(SecureUser secureUser);
+    Person createSecurePerson(PayMyBuddyUserDetails userDetails);
 }

@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.SessionAttributes;
 
 import com.paymybuddy.finance.dto.UserLoginDTO;
 import com.paymybuddy.finance.model.Person;
-import com.paymybuddy.finance.security.SecureUser;
+import com.paymybuddy.finance.security.PayMyBuddyUserDetails;
 import com.paymybuddy.finance.service.IFinanceService;
 import com.paymybuddy.finance.service.ILoginService;
 import com.paymybuddy.finance.service.IPersonService;
@@ -84,13 +84,13 @@ public class LoginController {
 	} else {
 
 	    // Authorization (Standard, OAuth2, OpenIDC)
-	    SecureUser secureUser = loginService.getSecureUserFromPrincipal(user);
+	    PayMyBuddyUserDetails userDetails = loginService.getUserDetailsUserFromPrincipal(user);
 
-	    if (secureUser != null) {
+	    if (userDetails != null) {
 		// If needed (Oauth2, OpenIDC) Person initialization (Person + Role +
 		// creatingaccount)
 		// for standard login, the secure person has already been created
-		Person person = financeService.createSecurePerson(secureUser);
+		Person person = financeService.createSecurePerson(userDetails);
 
 		person = personService.findFetchWithAllPersonByName(person.getName());
 		model.addAttribute("person", person);
@@ -163,9 +163,9 @@ public class LoginController {
 	    // User secure creation (Person + Role + accounts creation)
 	    // Before the login
 	    UserLoginDTO userLoginDTO = new UserLoginDTO(username, password, username);
-	    SecureUser secureUser = new SecureUser(userLoginDTO,
+	    PayMyBuddyUserDetails userDetails = new PayMyBuddyUserDetails(userLoginDTO,
 		    Arrays.asList(new SimpleGrantedAuthority(ROLE_USER)));
-	    financeService.createSecurePerson(secureUser);
+	    financeService.createSecurePerson(userDetails);
 
 	    model.addAttribute("userSuccessfullyRegistered", true);
 

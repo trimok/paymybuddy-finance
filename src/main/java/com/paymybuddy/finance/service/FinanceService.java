@@ -27,7 +27,7 @@ import com.paymybuddy.finance.model.Account;
 import com.paymybuddy.finance.model.Bank;
 import com.paymybuddy.finance.model.Person;
 import com.paymybuddy.finance.model.Transaction;
-import com.paymybuddy.finance.security.SecureUser;
+import com.paymybuddy.finance.security.PayMyBuddyUserDetails;
 
 @Service
 public class FinanceService implements IFinanceService {
@@ -140,7 +140,7 @@ public class FinanceService implements IFinanceService {
 	Person payMyBuddyGenericUser = personService.findPersonByName(PAY_MY_BUDDY_GENERIC_USER);
 	if (payMyBuddyGenericUser == null) {
 	    userDetailsManager.createUser(
-		    new SecureUser(
+		    new PayMyBuddyUserDetails(
 			    new UserLoginDTO(PAY_MY_BUDDY_GENERIC_USER, PAY_MY_BUDDY_GENERIC_USER_PASSWORD_ENCODED,
 				    PAY_MY_BUDDY_GENERIC_USER),
 			    Arrays.asList(new SimpleGrantedAuthority(ROLE_USER))));
@@ -309,16 +309,16 @@ public class FinanceService implements IFinanceService {
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Person createSecurePerson(SecureUser secureUser) {
+    public Person createSecurePerson(PayMyBuddyUserDetails userDetails) {
 
 	// Creating secure Person (table Person + table Role + accounts) if not already
 	// created
-	Person personDatabase = personService.findPersonByName(secureUser.getUsername());
+	Person personDatabase = personService.findPersonByName(userDetails.getUsername());
 	if (personDatabase == null) {
-	    secureUser.getUserLogin().setPassword(passwordEncoder.encode(secureUser.getPassword()));
-	    userDetailsManager.createUser(secureUser);
+	    userDetails.getUserLogin().setPassword(passwordEncoder.encode(userDetails.getPassword()));
+	    userDetailsManager.createUser(userDetails);
 	    // Person initialization (creating accounts)
-	    return initPerson(new Person(secureUser.getUsername()));
+	    return initPerson(new Person(userDetails.getUsername()));
 	} else {
 	    return personDatabase;
 	}

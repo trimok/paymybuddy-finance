@@ -21,7 +21,7 @@ import lombok.Setter;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class SecureUser implements UserDetails {
+public class PayMyBuddyUserDetails implements UserDetails {
 
     /**
      * serialVersionUID
@@ -41,7 +41,7 @@ public class SecureUser implements UserDetails {
     /*
      * 
      */
-    public SecureUser(UserLoginDTO userLogin) {
+    public PayMyBuddyUserDetails(UserLoginDTO userLogin) {
 	this.userLogin = userLogin;
     }
 

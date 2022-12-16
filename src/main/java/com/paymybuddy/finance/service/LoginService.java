@@ -18,7 +18,7 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
 import com.paymybuddy.finance.dto.UserLoginDTO;
-import com.paymybuddy.finance.security.SecureUser;
+import com.paymybuddy.finance.security.PayMyBuddyUserDetails;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -47,33 +47,33 @@ public class LoginService implements ILoginService {
     }
 
     /**
-     * Building a Person Object from a Principal
+     * Building a UserDetails from a Principal
      */
     @Override
-    public SecureUser getSecureUserFromPrincipal(Principal user) {
-	SecureUser secureUser = new SecureUser();
+    public PayMyBuddyUserDetails getUserDetailsUserFromPrincipal(Principal user) {
+	PayMyBuddyUserDetails userDetails = new PayMyBuddyUserDetails();
 
 	// Get the Person Object from different type of login
 	if (user instanceof UsernamePasswordAuthenticationToken) {
 	    // Basic login
-	    secureUser = getSecureUserFromStandardPrincipal(user);
+	    userDetails = getUserDetailsFromStandardPrincipal(user);
 	} else if (user instanceof OAuth2AuthenticationToken) {
 	    // OAuth / OIDC login
-	    secureUser = getSecureUserFromOauth2OidcPrincipal(user);
+	    userDetails = getUserDetailsFromOauth2OidcPrincipal(user);
 	}
-	return secureUser;
+	return userDetails;
     }
 
     /**
      * 
-     * OAuth2 / OIDC login Getting a Person object from a Principal
+     * OAuth2 / OIDC login Getting a UserDetails object from a Principal
      * 
      * @param user
      * @return
      */
     @Override
-    public SecureUser getSecureUserFromOauth2OidcPrincipal(Principal user) {
-	SecureUser secureUser = new SecureUser();
+    public PayMyBuddyUserDetails getUserDetailsFromOauth2OidcPrincipal(Principal user) {
+	PayMyBuddyUserDetails userDetails = new PayMyBuddyUserDetails();
 	UserLoginDTO userLogin = new UserLoginDTO();
 
 	// Authentication token
@@ -105,7 +105,7 @@ public class LoginService implements ILoginService {
 	    userLogin.setEmail((String) claims.get("email"));
 	    userLogin.setPassword(GENERIC_PASSWORD);
 
-	    secureUser.addAuthority(new SimpleGrantedAuthority(ROLE_OIDC_USER));
+	    userDetails.addAuthority(new SimpleGrantedAuthority(ROLE_OIDC_USER));
 
 	    log.info("OAuth2 / OIDC login");
 
@@ -124,27 +124,27 @@ public class LoginService implements ILoginService {
 		userLogin.setEmail(email);
 		userLogin.setUsername(name);
 		userLogin.setPassword(GENERIC_PASSWORD);
-		secureUser.addAuthority(new SimpleGrantedAuthority(ROLE_OAUTH2_USER));
+		userDetails.addAuthority(new SimpleGrantedAuthority(ROLE_OAUTH2_USER));
 	    }
 	    log.info("OAuth2, but No OIDC login");
 	}
 
 	log.info("Connection, name :" + userLogin.getUsername() + ", email : " + userLogin.getEmail());
 
-	secureUser.setUserLogin(userLogin);
-	return secureUser;
+	userDetails.setUserLogin(userLogin);
+	return userDetails;
     }
 
     /**
-     * Getting a Person object from a Principal Basic login (login after
+     * Getting a UserDetails object from a Principal Basic login (login after
      * registration)
      * 
      * @param principal : the principal
      * @return : a Person object
      */
     @Override
-    public SecureUser getSecureUserFromStandardPrincipal(Principal principal) {
-	SecureUser secureUser = new SecureUser();
+    public PayMyBuddyUserDetails getUserDetailsFromStandardPrincipal(Principal principal) {
+	PayMyBuddyUserDetails userDetails = new PayMyBuddyUserDetails();
 	UserLoginDTO userLogin = new UserLoginDTO();
 
 	// Get the authentication token
@@ -158,7 +158,7 @@ public class LoginService implements ILoginService {
 	    userLogin.setUsername(userId);
 	    userLogin.setEmail(userId);
 
-	    secureUser.addAuthority(new SimpleGrantedAuthority(ROLE_USER));
+	    userDetails.addAuthority(new SimpleGrantedAuthority(ROLE_USER));
 
 	    log.info("Basic login");
 	    log.info("Connection, name :" + userId + ", email : " + userId);
@@ -166,7 +166,7 @@ public class LoginService implements ILoginService {
 	    log.error("Not Authenticated");
 	    return null;
 	}
-	secureUser.setUserLogin(userLogin);
-	return secureUser;
+	userDetails.setUserLogin(userLogin);
+	return userDetails;
     }
 }

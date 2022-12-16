@@ -37,7 +37,7 @@ import com.paymybuddy.finance.model.Account;
 import com.paymybuddy.finance.model.Bank;
 import com.paymybuddy.finance.model.Person;
 import com.paymybuddy.finance.model.Transaction;
-import com.paymybuddy.finance.security.SecureUser;
+import com.paymybuddy.finance.security.PayMyBuddyUserDetails;
 import com.paymybuddy.finance.service.IAccountService;
 import com.paymybuddy.finance.service.IBankService;
 import com.paymybuddy.finance.service.IFinanceService;
@@ -111,7 +111,7 @@ public class SpringWebAppTest {
     public void testCreatePersons() {
 	// WHEN
 	UserLoginDTO userLogin = new UserLoginDTO(SECURE_USER, "password");
-	SecureUser secureUser = new SecureUser(userLogin);
+	PayMyBuddyUserDetails secureUser = new PayMyBuddyUserDetails(userLogin);
 	secureUser.addAuthority(new SimpleGrantedAuthority(ROLE_USER));
 	financeService.createSecurePerson(secureUser);
 	OFFSET_ACCOUNT += 2;

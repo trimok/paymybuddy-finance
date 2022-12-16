@@ -2,7 +2,7 @@ package com.paymybuddy.finance.service;
 
 import java.security.Principal;
 
-import com.paymybuddy.finance.security.SecureUser;
+import com.paymybuddy.finance.security.PayMyBuddyUserDetails;
 
 /**
  * @author trimok
@@ -13,25 +13,25 @@ public interface ILoginService {
      * Getting a Person object from a Principal
      * 
      * @param user : the principal
-     * @return : a SecureUser object
+     * @return : a PayMyBuddyUserDetails object
      */
-    SecureUser getSecureUserFromPrincipal(Principal user);
+    PayMyBuddyUserDetails getUserDetailsUserFromPrincipal(Principal user);
 
     /**
      * 
      * OAuth2 / OIDC login Getting a Person object from a Principal
      * 
      * @param user : the principal
-     * @return : a SecureUser object
+     * @return : a PayMyBuddyUserDetails object
      */
-    SecureUser getSecureUserFromOauth2OidcPrincipal(Principal user);
+    PayMyBuddyUserDetails getUserDetailsFromOauth2OidcPrincipal(Principal user);
 
     /**
      * Getting a Person object from a Principal Basic login (login after
      * registration)
      * 
      * @param user : the principal
-     * @return : a SecureUser object
+     * @return : a PayMyBuddyUserDetails object
      */
-    SecureUser getSecureUserFromStandardPrincipal(Principal principal);
+    PayMyBuddyUserDetails getUserDetailsFromStandardPrincipal(Principal principal);
 }
