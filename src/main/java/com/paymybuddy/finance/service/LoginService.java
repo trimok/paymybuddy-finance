@@ -1,9 +1,15 @@
 package com.paymybuddy.finance.service;
 
+import static com.paymybuddy.finance.constants.Constants.GENERIC_PASSWORD;
+import static com.paymybuddy.finance.constants.Constants.ROLE_OAUTH2_USER;
+import static com.paymybuddy.finance.constants.Constants.ROLE_OIDC_USER;
+import static com.paymybuddy.finance.constants.Constants.ROLE_USER;
+
 import java.security.Principal;
 import java.util.Map;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.core.oidc.OidcIdToken;
@@ -11,7 +17,8 @@ import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
-import com.paymybuddy.finance.model.Person;
+import com.paymybuddy.finance.dto.UserLoginDTO;
+import com.paymybuddy.finance.security.SecureUser;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -42,18 +49,19 @@ public class LoginService implements ILoginService {
     /**
      * Building a Person Object from a Principal
      */
-    public Person getPersonFromPrincipal(Principal user) {
-	Person person = null;
+    @Override
+    public SecureUser getSecureUserFromPrincipal(Principal user) {
+	SecureUser secureUser = new SecureUser();
 
 	// Get the Person Object from different type of login
 	if (user instanceof UsernamePasswordAuthenticationToken) {
 	    // Basic login
-	    person = getUserId(user);
+	    secureUser = getSecureUserFromStandardPrincipal(user);
 	} else if (user instanceof OAuth2AuthenticationToken) {
 	    // OAuth / OIDC login
-	    person = getOauth2UserId(user);
+	    secureUser = getSecureUserFromOauth2OidcPrincipal(user);
 	}
-	return person;
+	return secureUser;
     }
 
     /**
@@ -63,8 +71,10 @@ public class LoginService implements ILoginService {
      * @param user
      * @return
      */
-    public Person getOauth2UserId(Principal user) {
-	Person person = new Person();
+    @Override
+    public SecureUser getSecureUserFromOauth2OidcPrincipal(Principal user) {
+	SecureUser secureUser = new SecureUser();
+	UserLoginDTO userLogin = new UserLoginDTO();
 
 	// Authentication token
 	OAuth2AuthenticationToken authToken = ((OAuth2AuthenticationToken) user);
@@ -91,8 +101,11 @@ public class LoginService implements ILoginService {
 	    claims = idToken.getClaims();
 
 	    // Get the name / email infos from the claims
-	    person.setName((String) claims.get("name"));
-	    person.setEmail((String) claims.get("email"));
+	    userLogin.setUsername((String) claims.get("name"));
+	    userLogin.setEmail((String) claims.get("email"));
+	    userLogin.setPassword(GENERIC_PASSWORD);
+
+	    secureUser.addAuthority(new SimpleGrantedAuthority(ROLE_OIDC_USER));
 
 	    log.info("OAuth2 / OIDC login");
 
@@ -108,14 +121,18 @@ public class LoginService implements ILoginService {
 		// Email is very likely to be null, here
 		String email = (String) userAttributes.get("email");
 
-		person.setEmail(email);
-		person.setName(name);
+		userLogin.setEmail(email);
+		userLogin.setUsername(name);
+		userLogin.setPassword(GENERIC_PASSWORD);
+		secureUser.addAuthority(new SimpleGrantedAuthority(ROLE_OAUTH2_USER));
 	    }
 	    log.info("OAuth2, but No OIDC login");
 	}
 
-	log.info("Connection, name :" + person.getName() + ", email : " + person.getEmail());
-	return person;
+	log.info("Connection, name :" + userLogin.getUsername() + ", email : " + userLogin.getEmail());
+
+	secureUser.setUserLogin(userLogin);
+	return secureUser;
     }
 
     /**
@@ -125,8 +142,11 @@ public class LoginService implements ILoginService {
      * @param principal : the principal
      * @return : a Person object
      */
-    public Person getUserId(Principal principal) {
-	Person person = new Person();
+    @Override
+    public SecureUser getSecureUserFromStandardPrincipal(Principal principal) {
+	SecureUser secureUser = new SecureUser();
+	UserLoginDTO userLogin = new UserLoginDTO();
+
 	// Get the authentication token
 	UsernamePasswordAuthenticationToken token = ((UsernamePasswordAuthenticationToken) principal);
 	if (token.isAuthenticated()) {
@@ -135,8 +155,10 @@ public class LoginService implements ILoginService {
 	    String userId = user.getUsername();
 
 	    // Put name and email with the same userId
-	    person.setName(userId);
-	    person.setEmail(userId);
+	    userLogin.setUsername(userId);
+	    userLogin.setEmail(userId);
+
+	    secureUser.addAuthority(new SimpleGrantedAuthority(ROLE_USER));
 
 	    log.info("Basic login");
 	    log.info("Connection, name :" + userId + ", email : " + userId);
@@ -144,6 +166,7 @@ public class LoginService implements ILoginService {
 	    log.error("Not Authenticated");
 	    return null;
 	}
-	return person;
+	secureUser.setUserLogin(userLogin);
+	return secureUser;
     }
 }

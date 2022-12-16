@@ -18,6 +18,7 @@ import lombok.Setter;
 /**
  * @param username : username
  * @param password : password
+ * @param password : email
  */
 @AllArgsConstructor
 public class UserLoginDTO {
@@ -30,4 +31,22 @@ public class UserLoginDTO {
      * password
      */
     private String password;
+    /**
+     * email
+     */
+    private String email;
+
+    /**
+     * 
+     * Constructor
+     * 
+     * @param username : username
+     * @param password : password
+     */
+    public UserLoginDTO(String username, String password) {
+	super();
+	this.username = username;
+	this.password = password;
+    }
+
 }

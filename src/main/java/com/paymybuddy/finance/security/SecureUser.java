@@ -1,10 +1,9 @@
 package com.paymybuddy.finance.security;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Collection;
 
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import com.paymybuddy.finance.dto.UserLoginDTO;
@@ -37,11 +36,28 @@ public class SecureUser implements UserDetails {
     /**
      * authorities
      */
+    Collection<GrantedAuthority> authorities = new ArrayList<GrantedAuthority>();
+
+    /*
+     * 
+     */
+    public SecureUser(UserLoginDTO userLogin) {
+	this.userLogin = userLogin;
+    }
+
+    /*
+     * 
+     */
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-	GrantedAuthority authority = new SimpleGrantedAuthority("ROLE_USER");
+	return authorities;
+    }
 
-	return Arrays.asList(authority);
+    /*
+     * Adding an authority
+     */
+    public void addAuthority(GrantedAuthority authority) {
+	authorities.add(authority);
     }
 
     /**
@@ -58,6 +74,13 @@ public class SecureUser implements UserDetails {
     @Override
     public String getUsername() {
 	return userLogin.getUsername();
+    }
+
+    /**
+     * email
+     */
+    public String getEmail() {
+	return userLogin.getEmail();
     }
 
     /**

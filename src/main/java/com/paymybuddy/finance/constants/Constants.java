@@ -42,4 +42,8 @@ public class Constants {
      * AMOUNT_BEGIN
      */
     public static final int AMOUNT_BEGIN = 10000;
+
+    public static final String ROLE_USER = "ROLE_USER";
+    public static final String ROLE_OAUTH2_USER = "ROLE_OAUTH2_USER";
+    public static final String ROLE_OIDC_USER = "ROLE_OIDC_USER";
 }

@@ -2,6 +2,7 @@ package com.paymybuddy.finance;
 
 import static com.paymybuddy.finance.constants.Constants.PAY_MY_BUDDY_BANK;
 import static com.paymybuddy.finance.constants.Constants.PAY_MY_BUDDY_GENERIC_USER;
+import static com.paymybuddy.finance.constants.Constants.ROLE_USER;
 import static com.paymybuddy.finance.constants.Constants.USER_GENERIC_BANK;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -25,15 +26,18 @@ import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.paymybuddy.finance.constants.Constants;
+import com.paymybuddy.finance.dto.UserLoginDTO;
 import com.paymybuddy.finance.model.Account;
 import com.paymybuddy.finance.model.Bank;
 import com.paymybuddy.finance.model.Person;
 import com.paymybuddy.finance.model.Transaction;
+import com.paymybuddy.finance.security.SecureUser;
 import com.paymybuddy.finance.service.IAccountService;
 import com.paymybuddy.finance.service.IBankService;
 import com.paymybuddy.finance.service.IFinanceService;
@@ -106,7 +110,10 @@ public class SpringWebAppTest {
     @Order(1)
     public void testCreatePersons() {
 	// WHEN
-	financeService.createSecurePerson(SECURE_USER, "password");
+	UserLoginDTO userLogin = new UserLoginDTO(SECURE_USER, "password");
+	SecureUser secureUser = new SecureUser(userLogin);
+	secureUser.addAuthority(new SimpleGrantedAuthority(ROLE_USER));
+	financeService.createSecurePerson(secureUser);
 	OFFSET_ACCOUNT += 2;
 
 	personService.createPerson(OAUTH2, OAUTH2);

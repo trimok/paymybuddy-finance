@@ -1,5 +1,12 @@
 package com.paymybuddy.finance.security;
 
+import static com.paymybuddy.finance.constants.Constants.ROLE_OAUTH2_USER;
+import static com.paymybuddy.finance.constants.Constants.ROLE_OIDC_USER;
+import static com.paymybuddy.finance.constants.Constants.ROLE_USER;
+
+import java.util.HashSet;
+import java.util.Set;
+
 import javax.sql.DataSource;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,8 +16,13 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.core.oidc.user.OidcUserAuthority;
+import org.springframework.security.oauth2.core.user.OAuth2UserAuthority;
 import org.springframework.security.provisioning.JdbcUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
@@ -57,11 +69,12 @@ public class PayMyBuddySecurityConfig {
 	http.authorizeHttpRequests()
 		.requestMatchers("/registerNewUser", "/error").permitAll()
 		.requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
-		.anyRequest().authenticated()
+		.anyRequest().hasAnyAuthority(ROLE_USER, ROLE_OIDC_USER, ROLE_OAUTH2_USER)
 		.and().formLogin()
 		.loginPage("/login").failureUrl("/login?error=true")
 		.permitAll()
-		.and().oauth2Login().loginPage("/login").failureUrl("/login?error=true").permitAll()
+		.and().oauth2Login().userInfoEndpoint().userAuthoritiesMapper(this.userAuthoritiesMapper())
+		.and().loginPage("/login").failureUrl("/login?error=true").permitAll()
 		.and().logout().logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
 		.logoutSuccessUrl("/login?logout=true")
 		.deleteCookies("JSESSIONID")
@@ -69,6 +82,22 @@ public class PayMyBuddySecurityConfig {
 		.and().csrf().disable();
 
 	return http.build();
+    }
+
+    private GrantedAuthoritiesMapper userAuthoritiesMapper() {
+	return (authorities) -> {
+	    Set<GrantedAuthority> mappedAuthorities = new HashSet<>();
+
+	    authorities.forEach(authority -> {
+		if (OidcUserAuthority.class.isInstance(authority)) {
+		    mappedAuthorities.add(new SimpleGrantedAuthority("ROLE_OIDC_USER"));
+		} else if (OAuth2UserAuthority.class.isInstance(authority)) {
+		    mappedAuthorities.add(new SimpleGrantedAuthority("ROLE_OAUTH2_USER"));
+		}
+	    });
+
+	    return mappedAuthorities;
+	};
     }
 
     /**

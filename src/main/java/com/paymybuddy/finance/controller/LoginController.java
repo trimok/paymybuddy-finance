@@ -1,9 +1,13 @@
 package com.paymybuddy.finance.controller;
 
+import static com.paymybuddy.finance.constants.Constants.ROLE_USER;
+
 import java.security.Principal;
+import java.util.Arrays;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -13,7 +17,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.SessionAttributes;
 
+import com.paymybuddy.finance.dto.UserLoginDTO;
 import com.paymybuddy.finance.model.Person;
+import com.paymybuddy.finance.security.SecureUser;
 import com.paymybuddy.finance.service.IFinanceService;
 import com.paymybuddy.finance.service.ILoginService;
 import com.paymybuddy.finance.service.IPersonService;
@@ -66,17 +72,25 @@ public class LoginController {
      */
     @GetMapping("/*")
     public String getUserInfo(Model model, Principal user, @ModelAttribute("person") Person personAttribute) {
+	if (user == null) {
+	    return "login";
+	}
+
+	// Remark : the person object being in session has to be not null itself
+	// event if it does not contain available informations
 	if (personAttribute.getName() != null) {
 	    // Should never happen
 	    return "home";
 	} else {
 
 	    // Authorization (Standard, OAuth2, OpenIDC)
-	    Person person = loginService.getPersonFromPrincipal(user);
+	    SecureUser secureUser = loginService.getSecureUserFromPrincipal(user);
 
-	    if (person != null) {
-		// If needed (Oauth2, OpenIDC) Person initialization (creating account)
-		person = financeService.initPerson(person);
+	    if (secureUser != null) {
+		// If needed (Oauth2, OpenIDC) Person initialization (Person + Role +
+		// creatingaccount)
+		// for standard login, the secure person has already been created
+		Person person = financeService.createSecurePerson(secureUser);
 
 		person = personService.findFetchWithAllPersonByName(person.getName());
 		model.addAttribute("person", person);
@@ -145,8 +159,13 @@ public class LoginController {
 	    return "login";
 	} else {
 
-	    // User secure creation
-	    financeService.createSecurePerson(username, password);
+	    // If the user has successfully registered
+	    // User secure creation (Person + Role + accounts creation)
+	    // Before the login
+	    UserLoginDTO userLoginDTO = new UserLoginDTO(username, password, username);
+	    SecureUser secureUser = new SecureUser(userLoginDTO,
+		    Arrays.asList(new SimpleGrantedAuthority(ROLE_USER)));
+	    financeService.createSecurePerson(secureUser);
 
 	    model.addAttribute("userSuccessfullyRegistered", true);
 

@@ -5,6 +5,7 @@ import static com.paymybuddy.finance.constants.Constants.COMMISSION_RATE;
 import static com.paymybuddy.finance.constants.Constants.PAY_MY_BUDDY_BANK;
 import static com.paymybuddy.finance.constants.Constants.PAY_MY_BUDDY_GENERIC_USER;
 import static com.paymybuddy.finance.constants.Constants.PAY_MY_BUDDY_GENERIC_USER_PASSWORD_ENCODED;
+import static com.paymybuddy.finance.constants.Constants.ROLE_USER;
 import static com.paymybuddy.finance.constants.Constants.TRANSACTION_COMMISSION_DESCRIPTION;
 import static com.paymybuddy.finance.constants.Constants.USER_GENERIC_BANK;
 
@@ -14,6 +15,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.stereotype.Service;
@@ -139,7 +141,9 @@ public class FinanceService implements IFinanceService {
 	if (payMyBuddyGenericUser == null) {
 	    userDetailsManager.createUser(
 		    new SecureUser(
-			    new UserLoginDTO(PAY_MY_BUDDY_GENERIC_USER, PAY_MY_BUDDY_GENERIC_USER_PASSWORD_ENCODED)));
+			    new UserLoginDTO(PAY_MY_BUDDY_GENERIC_USER, PAY_MY_BUDDY_GENERIC_USER_PASSWORD_ENCODED,
+				    PAY_MY_BUDDY_GENERIC_USER),
+			    Arrays.asList(new SimpleGrantedAuthority(ROLE_USER))));
 	    payMyBuddyGenericUser = personService.findFetchWithAccountsPersonByName(PAY_MY_BUDDY_GENERIC_USER);
 	    accountService.createAccount(0, payMyBuddyGenericUser, payMyBuddyBank);
 	}
@@ -273,29 +277,28 @@ public class FinanceService implements IFinanceService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Person initPerson(Person person) {
-	// Person creation (no password creation, no role creation)
+
+	// The person is supposed to exist in the database
 	Person personDatabase = personService.findPersonByName(person.getName());
-	if (personDatabase == null) {
-	    personDatabase = personService.savePerson(person);
+
+	if (personDatabase != null) {
+	    Bank bankUserGeneric = bankService.findBankByName(USER_GENERIC_BANK);
+	    Bank bankPayMyBuddy = bankService.findBankByName(PAY_MY_BUDDY_BANK);
+
+	    // Account for generic user bank : creation
+	    Account accountGeneric = accountService.findAccountByPersonNameAndBankName(personDatabase.getName(),
+		    USER_GENERIC_BANK);
+	    if (accountGeneric == null) {
+		accountService.createAccount(AMOUNT_BEGIN, personDatabase, bankUserGeneric);
+	    }
+
+	    // Account for buddy bank : creation
+	    Account accountPayMyBuddy = accountService.findAccountByPersonNameAndBankName(personDatabase.getName(),
+		    PAY_MY_BUDDY_BANK);
+	    if (accountPayMyBuddy == null) {
+		accountService.createAccount(0, personDatabase, bankPayMyBuddy);
+	    }
 	}
-
-	Bank bankUserGeneric = bankService.findBankByName(USER_GENERIC_BANK);
-	Bank bankPayMyBuddy = bankService.findBankByName(PAY_MY_BUDDY_BANK);
-
-	// Account for generic user bank : creation
-	Account accountGeneric = accountService.findAccountByPersonNameAndBankName(personDatabase.getName(),
-		USER_GENERIC_BANK);
-	if (accountGeneric == null) {
-	    accountService.createAccount(AMOUNT_BEGIN, personDatabase, bankUserGeneric);
-	}
-
-	// Account for buddy bank : creation
-	Account accountPayMyBuddy = accountService.findAccountByPersonNameAndBankName(personDatabase.getName(),
-		PAY_MY_BUDDY_BANK);
-	if (accountPayMyBuddy == null) {
-	    accountService.createAccount(0, personDatabase, bankPayMyBuddy);
-	}
-
 	return personDatabase;
     }
 
@@ -306,14 +309,18 @@ public class FinanceService implements IFinanceService {
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Person createSecurePerson(String username, String password) {
-	UserLoginDTO userLogin = new UserLoginDTO(username, password);
-	userLogin.setPassword(passwordEncoder.encode(userLogin.getPassword()));
+    public Person createSecurePerson(SecureUser secureUser) {
 
-	// Creating secure Person (table Person + table Role)
-	userDetailsManager.createUser(new SecureUser(userLogin));
-
-	// Person initialization (creating accounts)
-	return initPerson(new Person(username));
+	// Creating secure Person (table Person + table Role + accounts) if not already
+	// created
+	Person personDatabase = personService.findPersonByName(secureUser.getUsername());
+	if (personDatabase == null) {
+	    secureUser.getUserLogin().setPassword(passwordEncoder.encode(secureUser.getPassword()));
+	    userDetailsManager.createUser(secureUser);
+	    // Person initialization (creating accounts)
+	    return initPerson(new Person(secureUser.getUsername()));
+	} else {
+	    return personDatabase;
+	}
     }
 }
