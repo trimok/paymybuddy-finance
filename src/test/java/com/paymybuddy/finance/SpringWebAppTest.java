@@ -29,6 +29,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.paymybuddy.finance.constants.Constants;
@@ -47,6 +48,7 @@ import com.paymybuddy.finance.service.ITransactionService;
 @SpringBootTest
 @AutoConfigureMockMvc
 @TestInstance(Lifecycle.PER_CLASS)
+@ActiveProfiles("test")
 @TestMethodOrder(value = org.junit.jupiter.api.MethodOrderer.OrderAnnotation.class)
 public class SpringWebAppTest {
 
@@ -101,9 +103,17 @@ public class SpringWebAppTest {
     }
 
     @Test
+    @Order(100)
     public void userLoginTest() throws Exception {
+
 	mvc.perform(formLogin("/login").user(PAY_MY_BUDDY_GENERIC_USER).password(
 		"password")).andExpect(authenticated());
+
+	/*
+	 * mvc.perform(formLogin("/login").user(SECURE_USER).password( "password"))
+	 * .andDo(result ->
+	 * mvc.perform(post("/goToProfile")).andDo(print()).andExpect(status().isOk()));
+	 */
     }
 
     @Test
