@@ -1,11 +1,16 @@
 package com.paymybuddy.finance.service;
 
 import static com.paymybuddy.finance.constants.Constants.AMOUNT_BEGIN;
+import static com.paymybuddy.finance.constants.Constants.AUTHORITY_USER;
 import static com.paymybuddy.finance.constants.Constants.COMMISSION_RATE;
+import static com.paymybuddy.finance.constants.Constants.ERROR_ACCOUNTS_MUST_BE_DIFFERENT;
+import static com.paymybuddy.finance.constants.Constants.ERROR_ORIGIN_ACCOUNT_AMOUNT_NOT_SUFFICIENT;
+import static com.paymybuddy.finance.constants.Constants.ERROR_SELECT_ACCOUNT_FROM;
+import static com.paymybuddy.finance.constants.Constants.ERROR_SELECT_ACCOUNT_TO;
+import static com.paymybuddy.finance.constants.Constants.ERROR_TRANSACTION_MUST_BE_FROM_BUDDY_ACCOUNT;
 import static com.paymybuddy.finance.constants.Constants.PAY_MY_BUDDY_BANK;
 import static com.paymybuddy.finance.constants.Constants.PAY_MY_BUDDY_GENERIC_USER;
 import static com.paymybuddy.finance.constants.Constants.PAY_MY_BUDDY_GENERIC_USER_PASSWORD_ENCODED;
-import static com.paymybuddy.finance.constants.Constants.ROLE_USER;
 import static com.paymybuddy.finance.constants.Constants.TRANSACTION_COMMISSION_DESCRIPTION;
 import static com.paymybuddy.finance.constants.Constants.USER_GENERIC_BANK;
 
@@ -15,6 +20,8 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.UserDetailsManager;
@@ -31,30 +38,20 @@ import com.paymybuddy.finance.security.PayMyBuddyUserDetails;
 
 @Service
 public class FinanceService implements IFinanceService {
-    /**
-     * ERROR_ORIGIN_ACCOUNT_AMOUNT_NOT_SUFFICIENT
-     */
-    private static final String ERROR_ORIGIN_ACCOUNT_AMOUNT_NOT_SUFFICIENT = "originAccountAmountNotSufficient";
 
-    /**
-     * ERROR_TRANSACTION_MUST_BE_FROM_BUDDY_ACCOUNT
-     */
-    private static final String ERROR_TRANSACTION_MUST_BE_FROM_BUDDY_ACCOUNT = "transactionMustBeFromBuddyAccount";
-
-    /**
-     * ERROR_ACCOUNTS_MUST_BE_DIFFERENT
-     */
-    private static final String ERROR_ACCOUNTS_MUST_BE_DIFFERENT = "accountsMustBeDifferent";
-
-    /**
-     * ERROR_SELECT_ACCOUNT_TO
-     */
-    private static final String ERROR_SELECT_ACCOUNT_TO = "selectAccountTo";
-
-    /**
-     * ERROR_SELECT_ACCOUNT_FROM
-     */
-    private static final String ERROR_SELECT_ACCOUNT_FROM = "selectAccountFrom";
+    @Autowired
+    public FinanceService(UserDetailsManager userDetailsManager, PasswordEncoder passwordEncoder,
+	    IRoleService roleService, IPersonService personService, IBankService bankService,
+	    IAccountService accountService, ITransactionService transactionService) {
+	super();
+	this.userDetailsManager = userDetailsManager;
+	this.passwordEncoder = passwordEncoder;
+	this.roleService = roleService;
+	this.personService = personService;
+	this.bankService = bankService;
+	this.accountService = accountService;
+	this.transactionService = transactionService;
+    }
 
     /**
      * userDetailsManager
@@ -122,6 +119,7 @@ public class FinanceService implements IFinanceService {
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
+    @EventListener(ApplicationReadyEvent.class)
     public void initApplication() {
 
 	// Buddy bank creation
@@ -143,7 +141,7 @@ public class FinanceService implements IFinanceService {
 		    new PayMyBuddyUserDetails(
 			    new UserLoginDTO(PAY_MY_BUDDY_GENERIC_USER, PAY_MY_BUDDY_GENERIC_USER_PASSWORD_ENCODED,
 				    PAY_MY_BUDDY_GENERIC_USER),
-			    Arrays.asList(new SimpleGrantedAuthority(ROLE_USER))));
+			    Arrays.asList(new SimpleGrantedAuthority(AUTHORITY_USER))));
 	    payMyBuddyGenericUser = personService.findFetchWithAccountsPersonByName(PAY_MY_BUDDY_GENERIC_USER);
 	    accountService.createAccount(0, payMyBuddyGenericUser, payMyBuddyBank);
 	}
@@ -207,12 +205,13 @@ public class FinanceService implements IFinanceService {
 
 	boolean buddyFrom = PAY_MY_BUDDY_BANK.equals(accountFrom.getBank().getName());
 	boolean buddyTo = PAY_MY_BUDDY_BANK.equals(accountTo.getBank().getName());
+	boolean transactionCommissionContext = buddyFrom && buddyTo;
 
 	Transaction.TransactionType transactionType = getTransactionType(buddyFrom, buddyTo);
 
 	// Commission transaction
 	Transaction transactionCommission = null;
-	if (buddyFrom) {
+	if (transactionCommissionContext) {
 	    Account genericAccountPayMyBuddy = accountService.findAccountByPersonNameAndBankName(
 		    PAY_MY_BUDDY_GENERIC_USER,
 		    PAY_MY_BUDDY_BANK);
@@ -226,7 +225,8 @@ public class FinanceService implements IFinanceService {
 	Transaction transaction = createTransaction(accountFrom, accountTo,
 		amount, description, transactionType);
 
-	return buddyFrom ? Arrays.asList(transaction, transactionCommission) : Arrays.asList(transaction);
+	return transactionCommissionContext ? Arrays.asList(transaction, transactionCommission)
+		: Arrays.asList(transaction);
     }
 
     /**
@@ -279,11 +279,11 @@ public class FinanceService implements IFinanceService {
     public Person initPerson(Person person) {
 
 	// The person is supposed to exist in the database
-	Person personDatabase = personService.findPersonByName(person.getName());
+	Person personDatabase = personService.findFetchWithAllPersonByName(person.getName());
 
 	if (personDatabase != null) {
-	    Bank bankUserGeneric = bankService.findBankByName(USER_GENERIC_BANK);
-	    Bank bankPayMyBuddy = bankService.findBankByName(PAY_MY_BUDDY_BANK);
+	    Bank bankUserGeneric = bankService.findWithAccountsBankByName(USER_GENERIC_BANK);
+	    Bank bankPayMyBuddy = bankService.findWithAccountsBankByName(PAY_MY_BUDDY_BANK);
 
 	    // Account for generic user bank : creation
 	    Account accountGeneric = accountService.findAccountByPersonNameAndBankName(personDatabase.getName(),
@@ -303,7 +303,7 @@ public class FinanceService implements IFinanceService {
     }
 
     /**
-     * Creation of a secure person (Person + password + Role)
+     * Creation of a secure person (Person + accounts + Role)
      * 
      * Called during registering, for registered users
      */
@@ -322,5 +322,30 @@ public class FinanceService implements IFinanceService {
 	} else {
 	    return personDatabase;
 	}
+    }
+
+    /**
+     * Utilitary method to create a secure person (Person + accounts +
+     * AUTHORITY_USER)
+     * 
+     */
+    @Override
+    public Person createAuthorityUserPerson(String name, String password) {
+	UserLoginDTO userLogin = new UserLoginDTO(name, password);
+	PayMyBuddyUserDetails secureUser = new PayMyBuddyUserDetails(userLogin);
+	secureUser.addAuthority(new SimpleGrantedAuthority(AUTHORITY_USER));
+	return createSecurePerson(secureUser);
+    }
+
+    /**
+     * Utilitary method to create a secure person (Person + accounts + authority)
+     * 
+     */
+    @Override
+    public Person createAuthorityPerson(String name, String password, String authority) {
+	UserLoginDTO userLogin = new UserLoginDTO(name, password);
+	PayMyBuddyUserDetails secureUser = new PayMyBuddyUserDetails(userLogin);
+	secureUser.addAuthority(new SimpleGrantedAuthority(authority));
+	return createSecurePerson(secureUser);
     }
 }

@@ -81,4 +81,20 @@ public interface IFinanceService {
      * @return : a Person
      */
     Person createSecurePerson(PayMyBuddyUserDetails userDetails);
+
+    /**
+     * Utilitary method to create a secure person (Person + accounts +
+     * AUTHORITY_USER)
+     * 
+     * @param name     : name
+     * @param password : password
+     * @return : the created Person
+     */
+    Person createAuthorityUserPerson(String name, String password);
+
+    /**
+     * Utilitary method to create a secure person (Person + accounts + authority)
+     * 
+     */
+    Person createAuthorityPerson(String name, String password, String authority);
 }

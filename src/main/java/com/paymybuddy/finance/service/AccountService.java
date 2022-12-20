@@ -1,5 +1,9 @@
 package com.paymybuddy.finance.service;
 
+import static com.paymybuddy.finance.constants.Constants.ERROR_ACCOUNT_ALREADY_EXISTS;
+import static com.paymybuddy.finance.constants.Constants.ERROR_SELECT_ACCOUNT_TO_ADD;
+import static com.paymybuddy.finance.constants.Constants.ERROR_SELECT_ACCOUNT_TO_REMOVE;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,25 +24,11 @@ import com.paymybuddy.finance.repository.PersonRepository;
  */
 @Service
 public class AccountService implements IAccountService {
-    /**
-     * ERROR_SELECT_ACCOUNT_TO_REMOVE
-     */
-    private static final String ERROR_SELECT_ACCOUNT_TO_REMOVE = "selectAccountToRemove";
-
-    /**
-     * ERROR_ACCOUNT_ALREADY_EXISTS
-     */
-    private static final String ERROR_ACCOUNT_ALREADY_EXISTS = "accountAlreadyExists";
-
-    /**
-     * ERROR_SELECT_ACCOUNT_TO_ADD
-     */
-    private static final String ERROR_SELECT_ACCOUNT_TO_ADD = "selectAccountToAdd";
 
     /**
      * accountRepository
      */
-    @Autowired
+
     AccountRepository accountRepository;
 
     /**
@@ -46,6 +36,12 @@ public class AccountService implements IAccountService {
      */
     @Autowired
     PersonRepository personRepository;
+
+    @Autowired
+    public AccountService(AccountRepository accountRepository, PersonRepository personRepository) {
+	this.accountRepository = accountRepository;
+	this.personRepository = personRepository;
+    }
 
     /**
      * Saving the account
@@ -61,7 +57,7 @@ public class AccountService implements IAccountService {
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Account createAccount(float amount, Person person, Bank bank) {
+    public Account createAccount(double amount, Person person, Bank bank) {
 	Account account = new Account(amount);
 
 	person.addAccount(account);

@@ -1,9 +1,9 @@
 package com.paymybuddy.finance.service;
 
 import static com.paymybuddy.finance.constants.Constants.GENERIC_PASSWORD;
-import static com.paymybuddy.finance.constants.Constants.ROLE_OAUTH2_USER;
-import static com.paymybuddy.finance.constants.Constants.ROLE_OIDC_USER;
-import static com.paymybuddy.finance.constants.Constants.ROLE_USER;
+import static com.paymybuddy.finance.constants.Constants.AUTHORITY_OAUTH2_USER;
+import static com.paymybuddy.finance.constants.Constants.AUTHORITY_OIDC_USER;
+import static com.paymybuddy.finance.constants.Constants.AUTHORITY_USER;
 
 import java.security.Principal;
 import java.util.Map;
@@ -105,7 +105,7 @@ public class LoginService implements ILoginService {
 	    userLogin.setEmail((String) claims.get("email"));
 	    userLogin.setPassword(GENERIC_PASSWORD);
 
-	    userDetails.addAuthority(new SimpleGrantedAuthority(ROLE_OIDC_USER));
+	    userDetails.addAuthority(new SimpleGrantedAuthority(AUTHORITY_OIDC_USER));
 
 	    log.info("OAuth2 / OIDC login");
 
@@ -124,7 +124,7 @@ public class LoginService implements ILoginService {
 		userLogin.setEmail(email);
 		userLogin.setUsername(name);
 		userLogin.setPassword(GENERIC_PASSWORD);
-		userDetails.addAuthority(new SimpleGrantedAuthority(ROLE_OAUTH2_USER));
+		userDetails.addAuthority(new SimpleGrantedAuthority(AUTHORITY_OAUTH2_USER));
 	    }
 	    log.info("OAuth2, but No OIDC login");
 	}
@@ -158,7 +158,7 @@ public class LoginService implements ILoginService {
 	    userLogin.setUsername(userId);
 	    userLogin.setEmail(userId);
 
-	    userDetails.addAuthority(new SimpleGrantedAuthority(ROLE_USER));
+	    userDetails.addAuthority(new SimpleGrantedAuthority(AUTHORITY_USER));
 
 	    log.info("Basic login");
 	    log.info("Connection, name :" + userId + ", email : " + userId);

@@ -61,19 +61,19 @@
 				disabled>Transfer</button>
 		</div>
 		<div class="mb-3 d-flex mx-auto  w-50">
-			<div th:if="${selectAccountFrom}"
+			<div th:if="${error_selectAccountFrom}"
 				class="mb-5 alert alert-success text-danger">Select an account
 				for origin</div>
-			<div th:if="${selectAccountTo}"
+			<div th:if="${error_selectAccountTo}"
 				class="mb-5 alert alert-success text-danger">Select an account
 				for destination</div>
-			<div th:if="${accountsMustBeDifferent}"
+			<div th:if="${error_accountsMustBeDifferent}"
 				class="mb-5 alert alert-success text-danger">The accounts must
 				be different</div>
-			<div th:if="${transactionMustBeFromBuddyAccount}"
+			<div th:if="${error_transactionMustBeFromBuddyAccount}"
 				class="mb-5 alert alert-success text-danger">
 				With final PayMyBuddy account, the origin account must be a PayMyBuddy account</div>	
-			<div th:if="${originAccountAmountNotSufficient}"
+			<div th:if="${error_originAccountAmountNotSufficient}"
 				class="mb-5 alert alert-success text-danger">
 				The origin account has not a sufficient amount</div>	
 				

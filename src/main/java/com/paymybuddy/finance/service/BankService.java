@@ -22,6 +22,11 @@ public class BankService implements IBankService {
     @Autowired
     BankRepository bankRepository;
 
+    @Autowired
+    public BankService(BankRepository bankRepository) {
+	this.bankRepository = bankRepository;
+    }
+
     /**
      * Creating a bank
      */

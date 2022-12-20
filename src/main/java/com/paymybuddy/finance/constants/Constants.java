@@ -43,7 +43,48 @@ public class Constants {
      */
     public static final int AMOUNT_BEGIN = 10000;
 
-    public static final String ROLE_USER = "ROLE_USER";
-    public static final String ROLE_OAUTH2_USER = "ROLE_OAUTH2_USER";
-    public static final String ROLE_OIDC_USER = "ROLE_OIDC_USER";
+    public static final String AUTHORITY_USER = "AUTHORITY_USER";
+    public static final String AUTHORITY_OAUTH2_USER = "AUTHORITY_OAUTH2_USER";
+    public static final String AUTHORITY_OIDC_USER = "AUTHORITY_OIDC_USER";
+
+    /**
+     * ERROR_SELECT_ACCOUNT_TO_REMOVE
+     */
+    public static final String ERROR_SELECT_ACCOUNT_TO_REMOVE = "error_selectAccountToRemove";
+
+    /**
+     * ERROR_ACCOUNT_ALREADY_EXISTS
+     */
+    public static final String ERROR_ACCOUNT_ALREADY_EXISTS = "error_accountAlreadyExists";
+
+    /**
+     * ERROR_SELECT_ACCOUNT_TO_ADD
+     */
+    public static final String ERROR_SELECT_ACCOUNT_TO_ADD = "error_selectAccountToAdd";
+
+    /**
+     * ERROR_ORIGIN_ACCOUNT_AMOUNT_NOT_SUFFICIENT
+     */
+    public static final String ERROR_ORIGIN_ACCOUNT_AMOUNT_NOT_SUFFICIENT = "error_originAccountAmountNotSufficient";
+
+    /**
+     * ERROR_TRANSACTION_MUST_BE_FROM_BUDDY_ACCOUNT
+     */
+    public static final String ERROR_TRANSACTION_MUST_BE_FROM_BUDDY_ACCOUNT = "error_transactionMustBeFromBuddyAccount";
+
+    /**
+     * ERROR_ACCOUNTS_MUST_BE_DIFFERENT
+     */
+    public static final String ERROR_ACCOUNTS_MUST_BE_DIFFERENT = "error_accountsMustBeDifferent";
+
+    /**
+     * ERROR_SELECT_ACCOUNT_TO
+     */
+    public static final String ERROR_SELECT_ACCOUNT_TO = "error_selectAccountTo";
+
+    /**
+     * ERROR_SELECT_ACCOUNT_FROM
+     */
+    public static final String ERROR_SELECT_ACCOUNT_FROM = "error_selectAccountFrom";
+
 }

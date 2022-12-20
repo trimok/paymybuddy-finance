@@ -23,6 +23,11 @@ public class TransactionService implements ITransactionService {
     @Autowired
     TransactionRepository transactionRepository;
 
+    @Autowired
+    public TransactionService(TransactionRepository transactionRepository) {
+	this.transactionRepository = transactionRepository;
+    }
+
     /**
      * accountRepository
      */

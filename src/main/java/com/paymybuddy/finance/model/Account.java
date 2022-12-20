@@ -117,7 +117,7 @@ public class Account {
      * @param bank   : the bank
      * @param amount : the amount
      */
-    public Account(Person person, Bank bank, float amount) {
+    public Account(Person person, Bank bank, double amount) {
 	super();
 	this.amount = amount;
 	this.person = person;
@@ -129,7 +129,7 @@ public class Account {
      * 
      * @param amount : the amount
      */
-    public Account(float amount) {
+    public Account(double amount) {
 	super();
 	this.amount = amount;
     }

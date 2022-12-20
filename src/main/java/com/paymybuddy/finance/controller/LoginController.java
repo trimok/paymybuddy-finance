@@ -1,6 +1,6 @@
 package com.paymybuddy.finance.controller;
 
-import static com.paymybuddy.finance.constants.Constants.ROLE_USER;
+import static com.paymybuddy.finance.constants.Constants.AUTHORITY_USER;
 
 import java.security.Principal;
 import java.util.Arrays;
@@ -164,7 +164,7 @@ public class LoginController {
 	    // Before the login
 	    UserLoginDTO userLoginDTO = new UserLoginDTO(username, password, username);
 	    PayMyBuddyUserDetails userDetails = new PayMyBuddyUserDetails(userLoginDTO,
-		    Arrays.asList(new SimpleGrantedAuthority(ROLE_USER)));
+		    Arrays.asList(new SimpleGrantedAuthority(AUTHORITY_USER)));
 	    financeService.createSecurePerson(userDetails);
 
 	    model.addAttribute("userSuccessfullyRegistered", true);

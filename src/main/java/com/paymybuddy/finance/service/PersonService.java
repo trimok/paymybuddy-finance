@@ -16,11 +16,16 @@ import com.paymybuddy.finance.repository.PersonRepository;
 @Service
 public class PersonService implements IPersonService {
 
+    @Autowired
+    private PersonRepository personRepository;
+
     /**
      * personRepository
      */
     @Autowired
-    PersonRepository personRepository;
+    public PersonService(PersonRepository personRepository) {
+	this.personRepository = personRepository;
+    }
 
     /**
      * Saving a person object

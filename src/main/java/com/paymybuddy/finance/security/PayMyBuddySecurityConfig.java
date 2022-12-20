@@ -1,8 +1,8 @@
 package com.paymybuddy.finance.security;
 
-import static com.paymybuddy.finance.constants.Constants.ROLE_OAUTH2_USER;
-import static com.paymybuddy.finance.constants.Constants.ROLE_OIDC_USER;
-import static com.paymybuddy.finance.constants.Constants.ROLE_USER;
+import static com.paymybuddy.finance.constants.Constants.AUTHORITY_OAUTH2_USER;
+import static com.paymybuddy.finance.constants.Constants.AUTHORITY_OIDC_USER;
+import static com.paymybuddy.finance.constants.Constants.AUTHORITY_USER;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -69,7 +69,7 @@ public class PayMyBuddySecurityConfig {
 	http.authorizeHttpRequests()
 		.requestMatchers("/registerNewUser", "/error").permitAll()
 		.requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
-		.anyRequest().hasAnyAuthority(ROLE_USER, ROLE_OIDC_USER, ROLE_OAUTH2_USER)
+		.anyRequest().hasAnyAuthority(AUTHORITY_USER, AUTHORITY_OIDC_USER, AUTHORITY_OAUTH2_USER)
 		.and().formLogin()
 		.loginPage("/login").failureUrl("/login?error=true")
 		.permitAll()
@@ -90,9 +90,9 @@ public class PayMyBuddySecurityConfig {
 
 	    authorities.forEach(authority -> {
 		if (OidcUserAuthority.class.isInstance(authority)) {
-		    mappedAuthorities.add(new SimpleGrantedAuthority("ROLE_OIDC_USER"));
+		    mappedAuthorities.add(new SimpleGrantedAuthority(AUTHORITY_OIDC_USER));
 		} else if (OAuth2UserAuthority.class.isInstance(authority)) {
-		    mappedAuthorities.add(new SimpleGrantedAuthority("ROLE_OAUTH2_USER"));
+		    mappedAuthorities.add(new SimpleGrantedAuthority(AUTHORITY_OAUTH2_USER));
 		}
 	    });
 

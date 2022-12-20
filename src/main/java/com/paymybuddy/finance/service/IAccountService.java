@@ -21,7 +21,7 @@ public interface IAccountService {
      * @param bank   : bank
      * @return : the account
      */
-    Account createAccount(float amount, Person person, Bank bank);
+    Account createAccount(double amount, Person person, Bank bank);
 
     /**
      * Creating an account
