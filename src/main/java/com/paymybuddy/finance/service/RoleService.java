@@ -20,6 +20,18 @@ public class RoleService implements IRoleService {
     private RoleRepository roleRepository;
 
     /**
+     * 
+     * Constructor for tests
+     * 
+     * @param roleRepository
+     */
+    @Autowired
+    public RoleService(RoleRepository roleRepository) {
+	super();
+	this.roleRepository = roleRepository;
+    }
+
+    /**
      * deleteAllRoles
      */
     @Override

@@ -310,4 +310,5 @@ public class IntegrationTest {
 	user = personService.findFetchWithAllPersonByName(SECURE_USER);
 	assertThat(user.getContactAccounts().size()).isEqualTo(0);
     }
+
 }

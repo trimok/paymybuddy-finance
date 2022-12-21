@@ -111,4 +111,14 @@ public class PersonService implements IPersonService {
 	personRepository.deleteAll();
 	personRepository.flush();
     }
+
+    /**
+     * deletePerson
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void deletePerson(Person person) {
+	personRepository.delete(person);
+	personRepository.flush();
+    }
 }

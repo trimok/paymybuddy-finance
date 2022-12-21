@@ -87,4 +87,14 @@ public class Constants {
      */
     public static final String ERROR_SELECT_ACCOUNT_FROM = "error_selectAccountFrom";
 
+    /*
+     * ERROR_PASSWORDS_DONT_MATCH
+     */
+    public static final String ERROR_PASSWORDS_DONT_MATCH = "error_passwordsDontMatch";
+
+    /**
+     * ERROR_USER_ALREADY_REGISTERED
+     */
+    public static final String ERROR_USER_ALREADY_REGISTERED = "error_userAlreadyRegistered";
+
 }

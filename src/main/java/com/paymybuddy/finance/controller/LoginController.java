@@ -1,13 +1,10 @@
 package com.paymybuddy.finance.controller;
 
-import static com.paymybuddy.finance.constants.Constants.AUTHORITY_USER;
-
 import java.security.Principal;
-import java.util.Arrays;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -17,7 +14,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.SessionAttributes;
 
-import com.paymybuddy.finance.dto.UserLoginDTO;
 import com.paymybuddy.finance.model.Person;
 import com.paymybuddy.finance.security.PayMyBuddyUserDetails;
 import com.paymybuddy.finance.service.IFinanceService;
@@ -147,31 +143,18 @@ public class LoginController {
     public String registerNewUser(Model model, @RequestParam String username, @RequestParam String password,
 	    @RequestParam String confirmPassword) {
 
+	// To keep the username
 	model.addAttribute("username", username);
 
-	if (!password.equals(confirmPassword)) {
-	    model.addAttribute("passwordsDontMatch", true);
-
+	List<String> errors = financeService.validateCreateAuthorityUserPerson(username, password, confirmPassword);
+	if (!errors.isEmpty()) {
+	    errors.forEach(e -> model.addAttribute(e, true));
 	    return "registerNewUser";
-	} else if (userDetailsManager.userExists(username)) {
-	    model.addAttribute("userAlreadyRegistered", true);
-
-	    return "login";
 	} else {
-
-	    // If the user has successfully registered
-	    // User secure creation (Person + Role + accounts creation)
-	    // Before the login
-	    UserLoginDTO userLoginDTO = new UserLoginDTO(username, password, username);
-	    PayMyBuddyUserDetails userDetails = new PayMyBuddyUserDetails(userLoginDTO,
-		    Arrays.asList(new SimpleGrantedAuthority(AUTHORITY_USER)));
-	    financeService.createSecurePerson(userDetails);
-
+	    financeService.createAuthorityUserPerson(username, password);
 	    model.addAttribute("userSuccessfullyRegistered", true);
-
 	    // To avoid error message logs (need session attributes)
 	    model.addAttribute("person", new Person());
-
 	    return "login";
 	}
     }

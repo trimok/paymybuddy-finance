@@ -5,9 +5,11 @@ import static com.paymybuddy.finance.constants.Constants.AUTHORITY_USER;
 import static com.paymybuddy.finance.constants.Constants.COMMISSION_RATE;
 import static com.paymybuddy.finance.constants.Constants.ERROR_ACCOUNTS_MUST_BE_DIFFERENT;
 import static com.paymybuddy.finance.constants.Constants.ERROR_ORIGIN_ACCOUNT_AMOUNT_NOT_SUFFICIENT;
+import static com.paymybuddy.finance.constants.Constants.ERROR_PASSWORDS_DONT_MATCH;
 import static com.paymybuddy.finance.constants.Constants.ERROR_SELECT_ACCOUNT_FROM;
 import static com.paymybuddy.finance.constants.Constants.ERROR_SELECT_ACCOUNT_TO;
 import static com.paymybuddy.finance.constants.Constants.ERROR_TRANSACTION_MUST_BE_FROM_BUDDY_ACCOUNT;
+import static com.paymybuddy.finance.constants.Constants.ERROR_USER_ALREADY_REGISTERED;
 import static com.paymybuddy.finance.constants.Constants.PAY_MY_BUDDY_BANK;
 import static com.paymybuddy.finance.constants.Constants.PAY_MY_BUDDY_GENERIC_USER;
 import static com.paymybuddy.finance.constants.Constants.PAY_MY_BUDDY_GENERIC_USER_PASSWORD_ENCODED;
@@ -322,6 +324,18 @@ public class FinanceService implements IFinanceService {
 	} else {
 	    return personDatabase;
 	}
+    }
+
+    @Override
+    public List<String> validateCreateAuthorityUserPerson(String username, String password, String confirmPassword) {
+	List<String> errors = new ArrayList<>();
+
+	if (!password.equals(confirmPassword)) {
+	    errors.add(ERROR_PASSWORDS_DONT_MATCH);
+	} else if (userDetailsManager.userExists(username)) {
+	    errors.add(ERROR_USER_ALREADY_REGISTERED);
+	}
+	return errors;
     }
 
     /**

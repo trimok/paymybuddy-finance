@@ -78,4 +78,9 @@ public interface IPersonService {
      * deleteAllPersons
      */
     void deleteAllPersons();
+
+    /**
+     * deletePerson
+     */
+    void deletePerson(Person person);
 }

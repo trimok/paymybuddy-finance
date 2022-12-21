@@ -16,7 +16,8 @@
 <body>
 
 	<div class="text-center w-25 mx-auto align-text-items">
-		<form class="card p-3 bg-light" action="#" th:action="@{/registerNewUser}" method="post">
+		<form class="card p-3 bg-light" action="#"
+			th:action="@{/registerNewUser}" method="post">
 			<div class="mb-5">
 				<button type="button" class="btn btn-success btn-group-small btn"
 					disabled>Pay My Buddy</button>
@@ -24,11 +25,16 @@
 
 			<div class="mb-3 d-flex">
 				<i class="bi bi-envelope my-auto"></i> <input type="email"
-					class="form-control" id="inputEmail" name="username" th:value="${username}"
-					placeholder="Email" required>
+					class="form-control" id="inputEmail" name="username"
+					th:value="${username}" placeholder="Email" required>
 			</div>
-			<div th:if="${passwordsDontMatch}"
-				class="mb-5 alert alert-success text-danger">Passwords don't match</div>
+			<div th:if="${error_passwordsDontMatch}"
+				class="mb-5 alert alert-success text-danger">Passwords don't
+				match</div>
+			<div th:if="${error_userAlreadyRegistered}"
+				class="mb-5 alert alert-success text-danger">User already
+				registered</div>
+
 			<div class="mb-3  d-flex">
 				<i class="bi bi-lock-fill  my-auto"></i> <input type="password"
 					class="form-control" id="inputPassword" name="password"
@@ -44,7 +50,8 @@
 			</div>
 			<div class="mb-5">
 				<button type="button" class="btn btn-link btn-group-small btn"
-					onClick="form.method='get';form.action='/login';submit();">Return to login.</button>
+					onClick="form.method='get';form.action='/login';submit();">Return
+					to login.</button>
 			</div>
 		</form>
 	</div>

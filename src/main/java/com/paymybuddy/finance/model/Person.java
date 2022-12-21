@@ -125,11 +125,22 @@ public class Person {
     /**
      * Constructor
      * 
-     * @param name : the name of the persont
+     * @param name : the name of the person
      */
     public Person(String name) {
 	super();
 	this.name = name;
+    }
+
+    /***
+     * Constructor (for tests)
+     * 
+     * @param id : the technical id of the person
+     */
+
+    public Person(Long id) {
+	super();
+	this.id = id;
     }
 
     /**

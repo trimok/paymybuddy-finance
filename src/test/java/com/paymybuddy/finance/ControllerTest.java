@@ -35,7 +35,6 @@ import com.paymybuddy.finance.dto.ContactDTO;
 import com.paymybuddy.finance.dto.TransferDTO;
 import com.paymybuddy.finance.model.Account;
 import com.paymybuddy.finance.model.Person;
-import com.paymybuddy.finance.security.PayMyBuddyUserDetails;
 import com.paymybuddy.finance.service.IAccountService;
 import com.paymybuddy.finance.service.IFinanceService;
 import com.paymybuddy.finance.service.ILoginService;
@@ -186,8 +185,10 @@ public class ControllerTest {
 
     @Test
     public void testLoginControllerRegisterNewUser() throws Exception {
-	when(financeService.createSecurePerson(any(PayMyBuddyUserDetails.class))).thenReturn(person);
-	when(userDetailsManager.userExists(any(String.class))).thenReturn(false);
+	when(financeService.validateCreateAuthorityUserPerson(any(String.class), any(String.class), any(String.class)))
+		.thenReturn(new ArrayList<String>());
+	when(financeService.createAuthorityUserPerson(any(String.class), any(String.class)))
+		.thenReturn(person);
 
 	mockMvc
 		.perform(MockMvcRequestBuilders.post("/registerNewUser").sessionAttrs(sessionAttr).param(
@@ -195,7 +196,8 @@ public class ControllerTest {
 		.andExpect(status().is(200))
 		.andExpect(view().name("login"));
 
-	verify(financeService, times(1)).createSecurePerson(any(PayMyBuddyUserDetails.class));
-	verify(userDetailsManager, times(1)).userExists(any(String.class));
+	verify(financeService, times(1)).validateCreateAuthorityUserPerson(any(String.class), any(String.class),
+		any(String.class));
+	verify(financeService, times(1)).createAuthorityUserPerson(any(String.class), any(String.class));
     }
 }

@@ -97,4 +97,10 @@ public interface IFinanceService {
      * 
      */
     Person createAuthorityPerson(String name, String password, String authority);
+
+    /*
+     * Validation of the creation of a registering user
+     */
+    List<String> validateCreateAuthorityUserPerson(String username, String password, String confirmPassword);
+
 }
