@@ -156,6 +156,7 @@ public class FinanceService implements IFinanceService {
      * @param buddyTo:  indicating the type of bank of destionation account
      * @return : the transaction type
      */
+    @Override
     public Transaction.TransactionType getTransactionType(boolean buddyFrom, boolean buddyTo) {
 	Transaction.TransactionType transactionType = null;
 

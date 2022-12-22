@@ -103,4 +103,13 @@ public interface IFinanceService {
      */
     List<String> validateCreateAuthorityUserPerson(String username, String password, String confirmPassword);
 
+    /**
+     * Getting the type of a transaction
+     * 
+     * @param buddyFrom : indicating the type of bank of origin account
+     * @param buddyTo:  indicating the type of bank of destionation account
+     * @return : the transaction type
+     */
+    TransactionType getTransactionType(boolean buddyFrom, boolean buddyTo);
+
 }

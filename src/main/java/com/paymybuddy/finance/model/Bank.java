@@ -13,6 +13,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -27,6 +28,10 @@ import lombok.Setter;
  * @NoArgsConstructor
  */
 @NoArgsConstructor
+/**
+ * @AllArgsConstructor
+ */
+@AllArgsConstructor
 @Entity
 public class Bank {
     /**
@@ -57,6 +62,18 @@ public class Bank {
      */
     public Bank(String name) {
 	super();
+	this.name = name;
+    }
+
+    /**
+     * Constructor for tests
+     * 
+     * @param id   : the id of the bank
+     * @param name : the name of the bank
+     */
+    public Bank(Long id, String name) {
+	super();
+	this.id = id;
 	this.name = name;
     }
 
