@@ -10,6 +10,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -26,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
@@ -35,9 +37,11 @@ import com.paymybuddy.finance.controller.FinanceController;
 import com.paymybuddy.finance.controller.LoginController;
 import com.paymybuddy.finance.dto.ContactDTO;
 import com.paymybuddy.finance.dto.TransferDTO;
+import com.paymybuddy.finance.dto.UserLoginDTO;
 import com.paymybuddy.finance.model.Account;
 import com.paymybuddy.finance.model.Bank;
 import com.paymybuddy.finance.model.Person;
+import com.paymybuddy.finance.security.PayMyBuddyUserDetails;
 import com.paymybuddy.finance.service.IAccountService;
 import com.paymybuddy.finance.service.IFinanceService;
 import com.paymybuddy.finance.service.ILoginService;
@@ -84,6 +88,7 @@ public class ControllerTest {
     private Person personWithContactAccount;
     private Bank buddyBank;
     private Account account;
+    private PayMyBuddyUserDetails userDetails;
 
     @BeforeAll
     public void beforeEach() {
@@ -96,6 +101,8 @@ public class ControllerTest {
 	personWithContactAccount.addContactAccount(account);
 
 	sessionAttr = new HashMap<String, Object>();
+
+	userDetails = new PayMyBuddyUserDetails(new UserLoginDTO(SECURE_USER, PASSWORD));
     }
 
     @AfterAll
@@ -233,5 +240,21 @@ public class ControllerTest {
 	verify(financeService, times(1)).validateCreateAuthorityUserPerson(any(String.class), any(String.class),
 		any(String.class));
 	verify(financeService, times(1)).createAuthorityUserPerson(any(String.class), any(String.class));
+    }
+
+    @Test
+    public void testLoginControllerGetUserDetails() throws Exception {
+	sessionAttr.put("person", new Person());
+	Principal principal = new UsernamePasswordAuthenticationToken(SECURE_USER, PASSWORD);
+
+	when(loginService.getUserDetailsUserFromPrincipal(any(Principal.class))).thenReturn(userDetails);
+	when(personService.findFetchWithAllPersonByName(any(String.class))).thenReturn(person);
+	when(financeService.createSecurePerson(any(PayMyBuddyUserDetails.class))).thenReturn(person);
+
+	mockMvc.perform(MockMvcRequestBuilders.get("/unknown").sessionAttrs(sessionAttr).principal(principal));
+
+	verify(personService, times(1)).findFetchWithAllPersonByName(any(String.class));
+	verify(financeService, times(1)).createSecurePerson(any(PayMyBuddyUserDetails.class));
+	verify(loginService, times(1)).getUserDetailsUserFromPrincipal(any(Principal.class));
     }
 }

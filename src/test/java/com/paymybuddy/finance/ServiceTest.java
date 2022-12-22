@@ -4,6 +4,7 @@ import static com.paymybuddy.finance.constants.Constants.AUTHORITY_USER;
 import static com.paymybuddy.finance.constants.Constants.PAY_MY_BUDDY_BANK;
 import static com.paymybuddy.finance.constants.Constants.USER_GENERIC_BANK;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.times;
@@ -24,7 +25,9 @@ import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.UserDetailsManager;
@@ -49,9 +52,11 @@ import com.paymybuddy.finance.service.FinanceService;
 import com.paymybuddy.finance.service.IAccountService;
 import com.paymybuddy.finance.service.IBankService;
 import com.paymybuddy.finance.service.IFinanceService;
+import com.paymybuddy.finance.service.ILoginService;
 import com.paymybuddy.finance.service.IPersonService;
 import com.paymybuddy.finance.service.IRoleService;
 import com.paymybuddy.finance.service.ITransactionService;
+import com.paymybuddy.finance.service.LoginService;
 import com.paymybuddy.finance.service.PersonService;
 import com.paymybuddy.finance.service.RoleService;
 import com.paymybuddy.finance.service.TransactionService;
@@ -72,6 +77,7 @@ public class ServiceTest {
     private ITransactionService transactionService;
     private IFinanceService financeService;
     private IRoleService roleService;
+    private ILoginService loginService;
 
     @Mock
     private PersonRepository personRepository;
@@ -122,6 +128,7 @@ public class ServiceTest {
 	accountService = new AccountService(accountRepository, personRepository);
 	transactionService = new TransactionService(transactionRepository);
 	roleService = new RoleService(roleRepository);
+	loginService = new LoginService();
 
 	financeService = new FinanceService(userDetailsManager, passwordEncoder,
 		mockRoleService, mockPersonService, mockBankService,
@@ -576,5 +583,25 @@ public class ServiceTest {
 	assertThat(transactionType).isEqualTo(Transaction.TransactionType.BANK_TO_BUDDY);
 	transactionType = financeService.getTransactionType(false, false);
 	assertThat(transactionType).isEqualTo(Transaction.TransactionType.BANK_TO_BANK);
+    }
+
+    @Test
+    public void testLoginServiceGetUserDetails() {
+	User user = new User(SECURE_USER, PASSWORD, Arrays.asList(new SimpleGrantedAuthority(AUTHORITY_USER)));
+	UsernamePasswordAuthenticationToken testingAuthenticationToken = new UsernamePasswordAuthenticationToken(user,
+		null, Arrays.asList(new SimpleGrantedAuthority(AUTHORITY_USER)));
+
+	UserDetails usesrDetails = loginService.getUserDetailsUserFromPrincipal(testingAuthenticationToken);
+	assertNotNull(usesrDetails);
+    }
+
+    @Test
+    public void testLoginServiceGetStandardUserDetails() {
+	User user = new User(SECURE_USER, PASSWORD, Arrays.asList(new SimpleGrantedAuthority(AUTHORITY_USER)));
+	UsernamePasswordAuthenticationToken testingAuthenticationToken = new UsernamePasswordAuthenticationToken(user,
+		null, Arrays.asList(new SimpleGrantedAuthority(AUTHORITY_USER)));
+
+	UserDetails usesrDetails = loginService.getUserDetailsFromStandardPrincipal(testingAuthenticationToken);
+	assertNotNull(usesrDetails);
     }
 }
