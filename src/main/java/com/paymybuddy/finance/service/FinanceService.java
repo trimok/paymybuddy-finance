@@ -346,10 +346,10 @@ public class FinanceService implements IFinanceService {
      */
     @Override
     public Person createAuthorityUserPerson(String name, String password) {
-	UserLoginDTO userLogin = new UserLoginDTO(name, password);
-	PayMyBuddyUserDetails secureUser = new PayMyBuddyUserDetails(userLogin);
-	secureUser.addAuthority(new SimpleGrantedAuthority(AUTHORITY_USER));
-	return createSecurePerson(secureUser);
+	UserLoginDTO userLogin = new UserLoginDTO(name, password, name);
+	PayMyBuddyUserDetails userDetails = new PayMyBuddyUserDetails(userLogin);
+	userDetails.addAuthority(new SimpleGrantedAuthority(AUTHORITY_USER));
+	return createSecurePerson(userDetails);
     }
 
     /**
@@ -359,8 +359,8 @@ public class FinanceService implements IFinanceService {
     @Override
     public Person createAuthorityPerson(String name, String password, String authority) {
 	UserLoginDTO userLogin = new UserLoginDTO(name, password);
-	PayMyBuddyUserDetails secureUser = new PayMyBuddyUserDetails(userLogin);
-	secureUser.addAuthority(new SimpleGrantedAuthority(authority));
-	return createSecurePerson(secureUser);
+	PayMyBuddyUserDetails userDetails = new PayMyBuddyUserDetails(userLogin);
+	userDetails.addAuthority(new SimpleGrantedAuthority(authority));
+	return createSecurePerson(userDetails);
     }
 }

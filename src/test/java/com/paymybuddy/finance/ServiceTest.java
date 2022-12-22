@@ -16,7 +16,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -60,7 +59,7 @@ import com.paymybuddy.finance.service.TransactionService;
 @ExtendWith(MockitoExtension.class)
 @TestInstance(Lifecycle.PER_CLASS)
 @ActiveProfiles("test")
-@TestMethodOrder(value = org.junit.jupiter.api.MethodOrderer.OrderAnnotation.class)
+@TestMethodOrder(value = org.junit.jupiter.api.MethodOrderer.MethodName.class)
 public class ServiceTest {
 
     private static final String SECURE_USER = "user@user.com";
@@ -115,8 +114,19 @@ public class ServiceTest {
     private TransferDTO transferDTO;
     private PayMyBuddyUserDetails userDetails;
 
-    @BeforeAll
-    public void beforeAll() {
+    @BeforeEach
+    public void beforeEach() {
+
+	personService = new PersonService(personRepository);
+	bankService = new BankService(bankRepository);
+	accountService = new AccountService(accountRepository, personRepository);
+	transactionService = new TransactionService(transactionRepository);
+	roleService = new RoleService(roleRepository);
+
+	financeService = new FinanceService(userDetailsManager, passwordEncoder,
+		mockRoleService, mockPersonService, mockBankService,
+		mockAccountService, mockTransactionService);
+
 	personNotSaved = new Person(SECURE_USER, SECURE_USER);
 	personSaved = new Person(SECURE_USER, SECURE_USER);
 	personSaved.setId(1L);
@@ -157,20 +167,6 @@ public class ServiceTest {
 	userDetails = new PayMyBuddyUserDetails(userLogin);
 	userDetails.addAuthority(new SimpleGrantedAuthority(AUTHORITY_USER));
 
-    }
-
-    @BeforeEach
-    public void beforeEach() {
-
-	personService = new PersonService(personRepository);
-	bankService = new BankService(bankRepository);
-	accountService = new AccountService(accountRepository, personRepository);
-	transactionService = new TransactionService(transactionRepository);
-	roleService = new RoleService(roleRepository);
-
-	financeService = new FinanceService(userDetailsManager, passwordEncoder,
-		mockRoleService, mockPersonService, mockBankService,
-		mockAccountService, mockTransactionService);
     }
 
     @Test

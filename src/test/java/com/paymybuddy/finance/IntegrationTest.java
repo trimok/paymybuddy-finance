@@ -50,7 +50,7 @@ import com.paymybuddy.finance.service.ITransactionService;
 @AutoConfigureMockMvc
 @TestInstance(Lifecycle.PER_CLASS)
 @ActiveProfiles("test")
-@TestMethodOrder(value = org.junit.jupiter.api.MethodOrderer.OrderAnnotation.class)
+@TestMethodOrder(value = org.junit.jupiter.api.MethodOrderer.MethodName.class)
 public class IntegrationTest {
 
     private static final String SECURE_USER = "user@user.com";

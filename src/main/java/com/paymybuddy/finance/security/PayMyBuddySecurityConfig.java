@@ -24,6 +24,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.oidc.user.OidcUserAuthority;
 import org.springframework.security.oauth2.core.user.OAuth2UserAuthority;
 import org.springframework.security.provisioning.JdbcUserDetailsManager;
+import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
@@ -49,7 +50,7 @@ public class PayMyBuddySecurityConfig {
      * @return : the PayMyBuddyJdbcUserDetailsManager
      */
     @Bean
-    JdbcUserDetailsManager jdbcUserDetailsManager(DataSource dataSource) {
+    UserDetailsManager payMyBuddyUserDetailsService(DataSource dataSource) {
 	JdbcUserDetailsManager jdbcUserDetailsManager = new PayMyBuddyJdbcUserDetailsManager();
 	jdbcUserDetailsManager.setDataSource(dataSource);
 

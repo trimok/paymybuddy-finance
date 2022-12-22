@@ -41,7 +41,7 @@ import com.paymybuddy.finance.repository.TransactionRepository;
 @ExtendWith(MockitoExtension.class)
 @TestInstance(Lifecycle.PER_CLASS)
 @ActiveProfiles("test")
-@TestMethodOrder(value = org.junit.jupiter.api.MethodOrderer.OrderAnnotation.class)
+@TestMethodOrder(value = org.junit.jupiter.api.MethodOrderer.MethodName.class)
 public class RepositoryTest {
 
     private static final String SECURE_USER = "user@user.com";

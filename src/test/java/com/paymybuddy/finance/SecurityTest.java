@@ -44,7 +44,7 @@ import com.paymybuddy.finance.service.ITransactionService;
 @AutoConfigureMockMvc
 @TestInstance(Lifecycle.PER_CLASS)
 @ActiveProfiles("test")
-@TestMethodOrder(value = org.junit.jupiter.api.MethodOrderer.OrderAnnotation.class)
+@TestMethodOrder(value = org.junit.jupiter.api.MethodOrderer.MethodName.class)
 public class SecurityTest {
 
     private static final String REGISTERING_USER = "titi@titi.com";
@@ -58,6 +58,9 @@ public class SecurityTest {
 
     private static final String SECURE_USER = "user@user.com";
     private static final String PASSWORD = "password";
+
+    private static final String TEST_USER = "test@test.com";
+    private static final String TEST_PASSWORD = "password";
 
     @Autowired
     MockMvc mockMvc;
@@ -134,6 +137,7 @@ public class SecurityTest {
 
 	mockMvc.perform(
 		MockMvcRequestBuilders.post("/gotoContact").sessionAttrs(sessionAttrs))
+		.andExpect(view().name("contact"))
 		.andExpect(status().isOk());
     }
 
@@ -163,6 +167,7 @@ public class SecurityTest {
 
 	mockMvc.perform(
 		MockMvcRequestBuilders.post("/gotoContact").sessionAttrs(sessionAttrs))
+		.andExpect(view().name("contact"))
 		.andExpect(status().isOk());
     }
 

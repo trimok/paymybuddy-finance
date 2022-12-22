@@ -47,6 +47,6 @@ public class UserLoginDTO {
 	super();
 	this.username = username;
 	this.password = password;
+	this.email = username;
     }
-
 }

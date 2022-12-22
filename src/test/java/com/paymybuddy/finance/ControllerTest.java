@@ -1,5 +1,7 @@
 package com.paymybuddy.finance;
 
+import static com.paymybuddy.finance.constants.Constants.PAY_MY_BUDDY_BANK;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -34,6 +36,7 @@ import com.paymybuddy.finance.controller.LoginController;
 import com.paymybuddy.finance.dto.ContactDTO;
 import com.paymybuddy.finance.dto.TransferDTO;
 import com.paymybuddy.finance.model.Account;
+import com.paymybuddy.finance.model.Bank;
 import com.paymybuddy.finance.model.Person;
 import com.paymybuddy.finance.service.IAccountService;
 import com.paymybuddy.finance.service.IFinanceService;
@@ -47,7 +50,7 @@ import jakarta.servlet.http.HttpSession;
 @ExtendWith(MockitoExtension.class)
 @TestInstance(Lifecycle.PER_CLASS)
 @ActiveProfiles("test")
-@TestMethodOrder(value = org.junit.jupiter.api.MethodOrderer.OrderAnnotation.class)
+@TestMethodOrder(value = org.junit.jupiter.api.MethodOrderer.MethodName.class)
 public class ControllerTest {
 
     private static final String SECURE_USER = "user@user.com";
@@ -77,13 +80,22 @@ public class ControllerTest {
     private HashMap<String, Object> sessionAttr;
 
     private Person person;
+    private Person personWithoutContactAccount;
+    private Person personWithContactAccount;
+    private Bank buddyBank;
+    private Account account;
 
     @BeforeAll
-    public void beforeAll() {
+    public void beforeEach() {
 	person = new Person(SECURE_USER, PASSWORD);
+	personWithoutContactAccount = new Person(SECURE_USER, PASSWORD);
+	buddyBank = new Bank(PAY_MY_BUDDY_BANK);
+
+	account = new Account(person, buddyBank, 1000);
+	personWithContactAccount = new Person(SECURE_USER, PASSWORD);
+	personWithContactAccount.addContactAccount(account);
 
 	sessionAttr = new HashMap<String, Object>();
-	sessionAttr.put("person", person);
     }
 
     @AfterAll
@@ -92,6 +104,8 @@ public class ControllerTest {
 
     @Test
     public void testFinanceControllerGoToContact() throws Exception {
+
+	sessionAttr.put("person", person);
 
 	when(userDetailsManager.userExists(any(String.class))).thenReturn(false);
 	when(personService.findFetchWithAllPersonByName(SECURE_USER)).thenReturn(person);
@@ -111,17 +125,24 @@ public class ControllerTest {
     public void testFinanceControllerAddContact() throws Exception {
 	ContactDTO contactDTO = new ContactDTO(null, 1L, 1L);
 
-	when(personService.findFetchWithAllPersonByName(SECURE_USER)).thenReturn(person);
+	sessionAttr.put("person", personWithoutContactAccount);
+
+	when(personService.findFetchWithAllPersonByName(SECURE_USER)).thenReturn(personWithContactAccount);
 	when(accountService.validateCreateContactAccount(any(Person.class), any(ContactDTO.class)))
 		.thenReturn(new ArrayList<String>());
 
-	mockMvc
+	HttpSession session = mockMvc
 		.perform(MockMvcRequestBuilders.post("/addContactAccount").sessionAttrs(sessionAttr).flashAttr(
 			"contactDTO",
 			contactDTO))
 		.andExpect(status().is(200))
 		.andExpect(view().name("contact"))
-		.andExpect(model().attributeExists("contactDTO"));
+		.andExpect(model().attributeExists("contactDTO"))
+		.andReturn()
+		.getRequest()
+		.getSession();
+
+	assertThat(session.getAttribute("person")).isEqualTo(personWithContactAccount);
 
 	verify(personService, times(1)).findFetchWithAllPersonByName(any(String.class));
 	verify(accountService, times(1)).validateCreateContactAccount(any(Person.class), any(ContactDTO.class));
@@ -130,19 +151,27 @@ public class ControllerTest {
 
     @Test
     public void testFinanceControllerRemoveContact() throws Exception {
+
+	sessionAttr.put("person", personWithContactAccount);
+
 	ContactDTO contactDTO = new ContactDTO(null, 1L, 1L);
 
-	when(personService.findFetchWithAllPersonByName(SECURE_USER)).thenReturn(person);
+	when(personService.findFetchWithAllPersonByName(SECURE_USER)).thenReturn(personWithoutContactAccount);
 	when(accountService.validateRemoveContactAccount(any(Person.class), any(ContactDTO.class)))
 		.thenReturn(new ArrayList<String>());
 
-	mockMvc
+	HttpSession session = mockMvc
 		.perform(MockMvcRequestBuilders.post("/removeContactAccount").sessionAttrs(sessionAttr).flashAttr(
 			"contactDTO",
 			contactDTO))
 		.andExpect(status().is(200))
 		.andExpect(view().name("contact"))
-		.andExpect(model().attributeExists("contactDTO"));
+		.andExpect(model().attributeExists("contactDTO"))
+		.andReturn()
+		.getRequest()
+		.getSession();
+
+	assertThat(session.getAttribute("person")).isEqualTo(personWithoutContactAccount);
 
 	verify(personService, times(1)).findFetchWithAllPersonByName(any(String.class));
 	verify(accountService, times(1)).validateRemoveContactAccount(any(Person.class), any(ContactDTO.class));
@@ -151,6 +180,8 @@ public class ControllerTest {
 
     @Test
     public void testFinanceControllerGoToTransfer() throws Exception {
+
+	sessionAttr.put("person", person);
 
 	when(personService.findFetchWithAllPersonByName(SECURE_USER)).thenReturn(person);
 
@@ -165,6 +196,7 @@ public class ControllerTest {
 
     @Test
     public void testFinanceControllerTransfer() throws Exception {
+	sessionAttr.put("person", person);
 	TransferDTO transferDTO = new TransferDTO(1L, 2L, "virement", 1000.0);
 
 	when(personService.findFetchWithAllPersonByName(SECURE_USER)).thenReturn(person);
@@ -185,6 +217,8 @@ public class ControllerTest {
 
     @Test
     public void testLoginControllerRegisterNewUser() throws Exception {
+	sessionAttr.put("person", person);
+
 	when(financeService.validateCreateAuthorityUserPerson(any(String.class), any(String.class), any(String.class)))
 		.thenReturn(new ArrayList<String>());
 	when(financeService.createAuthorityUserPerson(any(String.class), any(String.class)))
