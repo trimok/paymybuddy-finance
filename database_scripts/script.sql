@@ -1,3 +1,9 @@
+drop table if exists transaction;
+drop table if exists person_contactaccount;
+drop table if exists account;
+drop table if exists bank;
+drop table if exists role;
+drop table if exists person;
 create table account (id bigint not null auto_increment, amount float(53) not null, bank_id bigint, person_id bigint, primary key (id));
 create table role (id bigint not null auto_increment, name varchar(50), roles varchar(50), person_id bigint, primary key (id));
 create table bank (id bigint not null auto_increment, name varchar(50), primary key (id));
@@ -14,4 +20,3 @@ alter table person_contactaccount add constraint person_contactaccount_account_i
 alter table person_contactaccount add constraint  person_contactaccount_person_id foreign key (person_id) references person (id);
 alter table transaction add constraint transaction_account_from_id foreign key (account_from_id) references account (id);
 alter table transaction add constraint transaction_account_to_id foreign key (account_to_id) references account (id);
-
