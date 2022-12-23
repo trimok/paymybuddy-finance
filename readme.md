@@ -1,0 +1,8 @@
+![](md/Diapositive1.PNG)
+![](md/Diapositive2.PNG)
+![](md/Diapositive3.PNG)
+![](md/Diapositive4.PNG)
+![](md/Diapositive5.PNG)
+![](md/Diapositive6.PNG)
+![](md/Diapositive7.PNG)
+![](md/Diapositive8.PNG)
