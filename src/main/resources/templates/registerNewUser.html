@@ -24,7 +24,10 @@
 			</div>
 
 			<div class="mb-3 d-flex">
-				<i class="bi bi-envelope my-auto"></i> <input type="email"
+				<i class="bi bi-envelope my-auto"></i> 
+				<button type="button" class="btn btn-light btn-group-small btn"
+				disabled></button>
+				<input type="email"
 					class="form-control" id="inputEmail" name="username"
 					th:value="${username}" placeholder="Email" required>
 			</div>
@@ -36,12 +39,18 @@
 				registered</div>
 
 			<div class="mb-3  d-flex">
-				<i class="bi bi-lock-fill  my-auto"></i> <input type="password"
+				<i class="bi bi-lock-fill  my-auto"></i> 
+				<button type="button" class="btn btn-light btn-group-small btn"
+				disabled></button>
+				<input type="password"
 					class="form-control" id="inputPassword" name="password"
 					placeholder="Password" required>
 			</div>
 			<div class="mb-3  d-flex">
-				<i class="bi bi-lock-fill  my-auto"></i> <input type="password"
+				<i class="bi bi-lock-fill  my-auto"></i> 
+				<button type="button" class="btn btn-light btn-group-small btn"
+				disabled></button>
+				<input type="password"
 					class="form-control" id="inputPassword" name="confirmPassword"
 					placeholder="Confirm Password" required>
 			</div>

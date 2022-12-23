@@ -30,26 +30,32 @@
 				class="mb-5 alert alert-success text-success">You have been
 				successfully logged out.</div>
 			<div th:if="${userSuccessfullyRegistered}"
-				class="mb-5 alert alert-success text-success">User successfully
-				registered, please sign in</div>
+				class="mb-5 alert alert-success text-success">User
+				successfully registered, please sign in</div>
 
 
 			<div class="mb-3 d-flex">
-				<i class="bi bi-envelope my-auto"></i> <input type="email"
-					class="form-control" id="inputEmail" name="username" th:value="${username}"
-					placeholder="Email" required>
+				<i class="bi bi-envelope my-auto"></i>
+				<button type="button" class="btn btn-light btn-group-small btn"
+					disabled></button>
+				<input type="email" class="form-control" id="inputEmail"
+					name="username" th:value="${username}" placeholder="Email" required>
 			</div>
 			<div class="mb-3  d-flex">
-				<i class="bi bi-lock-fill  my-auto"></i> <input type="password"
-					class="form-control" id="inputPassword" name="password"
-					placeholder="Password" required>
+				<i class="bi bi-lock-fill  my-auto"></i>
+				<button type="button" class="btn btn-light btn-group-small btn"
+					disabled></button>
+				<input type="password" class="form-control" id="inputPassword"
+					name="password" placeholder="Password" required>
 			</div>
 			<div class="mb-2">
-				<button type="submit" class="btn btn-primary btn-group-small">Sign in</button>
+				<button type="submit" class="btn btn-primary btn-group-small">Sign
+					in</button>
 			</div>
 			<div class="mb-5">
 				<button type="button" class="btn btn-link btn-group-small btn"
-					onClick="form.method='get';form.action='/registerNewUser';submit();">New user? Register here.</button>
+					onClick="form.method='get';form.action='/registerNewUser';submit();">New
+					user? Register here.</button>
 			</div>
 			<div class="mb-3">
 				<div class="mb-3">
@@ -57,14 +63,16 @@
 						disabled>Login with:</button>
 				</div>
 				<p>
-					<a class="link-primary" th:href="${urlGoogle}"> <img
-						th:src="${urlIconGoogle}"> Google
-					</a>
+					<button type="button" class="btn btn-light btn-group-small btn"
+						disabled></button>
+					<img th:src="${urlIconGoogle}" /> <a class="link-primary"
+						th:href="${urlGoogle}"> Google </a>
 				</p>
 				<p>
-					<a class="link-primary" th:href="${urlGithub}"> <img
-						th:src="${urlIconGithub}"> GitHub
-					</a>
+					<button type="button" class="btn btn-light btn-group-small btn"
+						disabled></button>
+					<img th:src="${urlIconGithub}" /> <a class="link-primary"
+						th:href="${urlGithub}"> GitHub </a>
 				</p>
 			</div>
 		</form>
