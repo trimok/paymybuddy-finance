@@ -1,5 +1,7 @@
 package com.paymybuddy.finance;
 
+import static com.paymybuddy.finance.constants.Constants.AUTHORITY_OAUTH2_USER;
+import static com.paymybuddy.finance.constants.Constants.AUTHORITY_OIDC_USER;
 import static com.paymybuddy.finance.constants.Constants.AUTHORITY_USER;
 import static com.paymybuddy.finance.constants.Constants.PAY_MY_BUDDY_BANK;
 import static com.paymybuddy.finance.constants.Constants.USER_GENERIC_BANK;
@@ -13,8 +15,11 @@ import static org.mockito.Mockito.when;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -26,10 +31,15 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
+import org.springframework.security.oauth2.core.oidc.OidcIdToken;
+import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.test.context.ActiveProfiles;
 
@@ -586,22 +596,64 @@ public class ServiceTest {
     }
 
     @Test
-    public void testLoginServiceGetUserDetails() {
-	User user = new User(SECURE_USER, PASSWORD, Arrays.asList(new SimpleGrantedAuthority(AUTHORITY_USER)));
-	UsernamePasswordAuthenticationToken testingAuthenticationToken = new UsernamePasswordAuthenticationToken(user,
-		null, Arrays.asList(new SimpleGrantedAuthority(AUTHORITY_USER)));
-
-	UserDetails usesrDetails = loginService.getUserDetailsUserFromPrincipal(testingAuthenticationToken);
-	assertNotNull(usesrDetails);
-    }
-
-    @Test
     public void testLoginServiceGetStandardUserDetails() {
 	User user = new User(SECURE_USER, PASSWORD, Arrays.asList(new SimpleGrantedAuthority(AUTHORITY_USER)));
 	UsernamePasswordAuthenticationToken testingAuthenticationToken = new UsernamePasswordAuthenticationToken(user,
 		null, Arrays.asList(new SimpleGrantedAuthority(AUTHORITY_USER)));
 
 	UserDetails usesrDetails = loginService.getUserDetailsFromStandardPrincipal(testingAuthenticationToken);
+	assertNotNull(usesrDetails);
+    }
+
+    @Test
+    public void testLoginServiceOidc2UserDetails() {
+
+	List<GrantedAuthority> authorities = Arrays.asList(new SimpleGrantedAuthority(AUTHORITY_OIDC_USER));
+	Map<String, Object> claims = new HashMap<>();
+	claims.put("name", "useroidc");
+	claims.put("email", "useroidc@useroidc.mail");
+
+	String userNameKey = "name";
+	OidcIdToken oidcIdToken = new OidcIdToken("56465465456465", null, null, claims);
+	DefaultOidcUser user = new DefaultOidcUser(authorities, oidcIdToken, userNameKey);
+	OAuth2AuthenticationToken testingAuthenticationToken = new OAuth2AuthenticationToken(user, authorities,
+		"sdcscd");
+
+	UserDetails usesrDetails = loginService.getUserDetailsUserFromPrincipal(testingAuthenticationToken);
+	assertNotNull(usesrDetails);
+    }
+
+    @Test
+    public void testLoginServiceOauth2UserDetails() {
+
+	List<GrantedAuthority> authorities = Arrays.asList(new SimpleGrantedAuthority(AUTHORITY_OAUTH2_USER));
+
+	OAuth2User user = new OAuth2User() {
+
+	    Map<String, Object> attributes = new HashMap<>();
+
+	    @Override
+	    public Map<String, Object> getAttributes() {
+		attributes.put("login", "userauth2_login");
+		return attributes;
+	    }
+
+	    @Override
+	    public Collection<? extends GrantedAuthority> getAuthorities() {
+		return authorities;
+	    }
+
+	    @Override
+	    public String getName() {
+		// TODO Auto-generated method stub
+		return "userauth2_name";
+	    }
+	};
+
+	OAuth2AuthenticationToken testingAuthenticationToken = new OAuth2AuthenticationToken(user, authorities,
+		"sdcscd");
+
+	UserDetails usesrDetails = loginService.getUserDetailsUserFromPrincipal(testingAuthenticationToken);
 	assertNotNull(usesrDetails);
     }
 }
