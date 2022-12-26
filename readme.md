@@ -6,3 +6,7 @@
 ![](md/Diapositive6.PNG)
 ![](md/Diapositive7.PNG)
 ![](md/Diapositive8.PNG)
+![](md/Diapositive9.PNG)
+![](md/Diapositive10.PNG)
+![](md/Diapositive11.PNG)
+![](md/Diapositive12.PNG)
